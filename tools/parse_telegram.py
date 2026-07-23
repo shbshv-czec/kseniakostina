@@ -136,8 +136,11 @@ def parse_price(text):
     # пробел и запятая. Требование ровно трёх цифр после разделителя важно:
     # иначе «$4,775 3.79ct» слиплось бы в 47753.
     NUM = r'\d{1,3}(?:[  ,]\d{3})+|\d+'
+    # Для числа ПЕРЕД долларом (19300$) требуем, чтобы слева не было буквы
+    # или слэша: иначе цифра из грейда «VS1 $2300» ловится как цена 1,
+    # а настоящие $2300 после неё уже съедены.
     values = []
-    for before, after in re.findall(r'\$\s?(%s)|(%s)\s?\$' % (NUM, NUM), text):
+    for before, after in re.findall(r'\$\s?(%s)|(?<![\w/])(%s)\s?\$' % (NUM, NUM), text):
         digits = re.sub(r'[^\d]', '', before or after)
         if digits:
             values.append(int(digits))
