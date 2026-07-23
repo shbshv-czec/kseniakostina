@@ -1,0 +1,233 @@
+/* ============================================================
+   Каталог и калькулятор.
+   Подключается после styles.css и опирается на его токены.
+   ============================================================ */
+
+/* ── Шапка страницы ── */
+.page-head { padding:clamp(110px,14vh,150px) var(--gutter) clamp(32px,5vw,56px) }
+.page-head .h2 { max-width:18ch }
+.page-head .lead { margin-top:20px; max-width:62ch; color:var(--fg-2) }
+
+/* ── Панель фильтров ── */
+.filters {
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(255,255,255,0.86);
+  backdrop-filter:blur(16px) saturate(1.4);
+  border-block:1px solid rgba(42,39,36,0.08);
+  padding:18px var(--gutter);
+}
+.filters__row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px }
+.filters__row:last-child { margin-bottom:0 }
+/* Обёртка групп кнопок: display:contents убирает лишний уровень,
+   поэтому кнопки переносятся в общем потоке строки фильтров. */
+.filters__group { display:contents }
+.filters__label--inline { min-width:0 }
+.filters__label {
+  font-size:12px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--fg-2); opacity:.7; margin-right:4px; flex:none; min-width:74px;
+}
+
+/* Кнопка-фильтр. Состояние живёт в aria-pressed, а не в классе,
+   поэтому скринридер читает его без дополнительных подсказок. */
+.chip {
+  font:inherit; font-size:14px; font-weight:500;
+  padding:8px 15px; border:1px solid rgba(42,39,36,0.18); border-radius:2px;
+  background:var(--bg-white); color:var(--fg-1); cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  transition:border-color .18s ease, background .18s ease, color .18s ease;
+}
+.chip:hover { border-color:var(--fg-1) }
+.chip[aria-pressed="true"] { background:var(--bg-ink); border-color:var(--bg-ink); color:var(--fg-inv) }
+.chip__n { font-size:12px; opacity:.55; font-variant-numeric:tabular-nums }
+.chip[aria-pressed="true"] .chip__n { opacity:.7 }
+.chip__dot { width:9px; height:9px; border-radius:50%; flex:none; box-shadow:inset 0 0 0 1px rgba(0,0,0,.12) }
+
+.select {
+  font:inherit; font-size:14px; font-weight:500; padding:8px 15px;
+  border:1px solid rgba(42,39,36,0.18); border-radius:2px;
+  background:var(--bg-white); color:var(--fg-1); cursor:pointer;
+}
+.reset {
+  font:inherit; font-size:14px; font-weight:500; padding:8px 4px;
+  border:0; background:none; color:var(--paraiba-2); cursor:pointer;
+  text-decoration:underline; text-underline-offset:3px;
+}
+.reset[hidden] { display:none }
+
+/* ── Счётчик результатов ── */
+.count {
+  padding:22px var(--gutter) 0;
+  font-size:15px; color:var(--fg-2);
+  font-variant-numeric:tabular-nums;
+}
+.count b { font-weight:600; color:var(--fg-1) }
+
+/* ── Сетка карточек ── */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));
+  gap:clamp(16px,2vw,28px);
+  padding:24px var(--gutter) clamp(48px,6vw,72px);
+  max-width:var(--wrap);
+  margin-inline:auto;
+  list-style:none;
+}
+
+.card {
+  display:flex; flex-direction:column;
+  background:var(--bg-white);
+  border:1px solid rgba(42,39,36,0.09);
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.card:hover { border-color:var(--gold-champagne); box-shadow:0 10px 34px rgba(42,39,36,.08) }
+.card--sold { opacity:.62 }
+
+.card__media { position:relative; aspect-ratio:1; overflow:hidden; background:var(--bg-cream) }
+.card__media img { width:100%; height:100%; object-fit:cover; display:block }
+
+/* Заглушка вместо фотографии: цвет берётся от камня, поэтому карточка
+   остаётся читаемой даже без снимка. */
+.card__ph {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(120% 100% at 30% 20%, rgba(255,255,255,.85), transparent 60%),
+    linear-gradient(150deg, var(--c1,#DCD6CB), var(--c2,#BFB6A6));
+}
+.card__ph span {
+  font-family:var(--font-display); font-size:20px; font-weight:600;
+  color:rgba(42,39,36,.55); text-align:center; padding:0 14px; line-height:1.2;
+}
+
+.card__badge {
+  position:absolute; top:10px; left:10px;
+  font-size:11px; font-weight:500; letter-spacing:.8px; text-transform:uppercase;
+  padding:5px 10px; border-radius:2px;
+  background:rgba(255,255,255,.92); color:var(--fg-1);
+}
+.card__badge--stock { background:var(--paraiba-2); color:#fff }
+.card__badge--sold  { background:rgba(42,39,36,.82); color:var(--fg-inv) }
+
+.card__body { padding:16px 16px 18px; display:flex; flex-direction:column; flex:1; gap:8px }
+.card__title { font-family:var(--font-display); font-size:19px; font-weight:600; line-height:1.2; margin:0 }
+.card__spec { font-size:13px; color:var(--fg-2); opacity:.85; margin:0 }
+.card__price { font-size:17px; font-weight:600; margin:2px 0 0; font-variant-numeric:tabular-nums }
+.card__price small { font-size:12px; font-weight:400; opacity:.6 }
+.card__price--ask { font-size:15px; font-weight:500; color:var(--fg-2) }
+.card__actions { margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:8px }
+.card__ask {
+  font:inherit; font-size:14px; font-weight:500; padding:11px 14px;
+  border:0; border-radius:2px; cursor:pointer;
+  background:var(--grad-paraiba); box-shadow:var(--shadow-paraiba); color:#fff;
+  transition:filter .18s ease;
+}
+.card__ask:hover { filter:brightness(1.06) }
+.card__link { font-size:13px; color:var(--paraiba-2); text-decoration:none; text-align:center }
+.card__link:hover { text-decoration:underline }
+
+/* ── Пустое состояние и подвал списка ── */
+.empty, .more {
+  max-width:640px; margin:0 auto; padding:clamp(40px,6vw,72px) var(--gutter);
+  text-align:center;
+}
+.empty h2 { font-family:var(--font-display); font-size:clamp(24px,3vw,34px); font-weight:600; margin:0 0 14px }
+.empty p { color:var(--fg-2); margin:0 0 26px }
+.more { padding-top:0 }
+.more p { color:var(--fg-2); margin:0 0 20px }
+.sentinel { height:1px }
+
+/* ── Уведомление о копировании ── */
+.toast {
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px);
+  background:var(--bg-ink); color:var(--fg-inv);
+  padding:13px 22px; border-radius:2px; font-size:15px;
+  box-shadow:0 12px 40px rgba(42,39,36,.28);
+  opacity:0; pointer-events:none; z-index:60;
+  transition:opacity .25s ease, transform .25s ease;
+  max-width:calc(100vw - 40px);
+}
+.toast.is-shown { opacity:1; transform:translate(-50%,0) }
+
+/* ── Калькулятор ── */
+.calc { max-width:var(--wrap); margin-inline:auto; padding:0 var(--gutter) clamp(56px,7vw,88px) }
+.calc__grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); gap:clamp(32px,4vw,64px); align-items:start }
+
+.field { margin-bottom:26px }
+.field__label {
+  display:block; font-size:12px; font-weight:500; letter-spacing:1.2px;
+  text-transform:uppercase; color:var(--fg-2); opacity:.75; margin-bottom:10px;
+}
+.field__row { display:flex; flex-wrap:wrap; gap:9px }
+.field__hint { font-size:13px; color:var(--fg-2); opacity:.7; margin:9px 0 0 }
+
+.range { width:100%; margin:6px 0 2px; accent-color:var(--paraiba-2) }
+.range-val { font-family:var(--font-display); font-size:30px; font-weight:600; font-variant-numeric:tabular-nums }
+.range-ends { display:flex; justify-content:space-between; font-size:12px; color:var(--fg-2); opacity:.6 }
+
+/* Результат */
+.result { position:sticky; top:24px; background:var(--bg-cream); padding:clamp(24px,3vw,34px) }
+.result__label { font-size:12px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase; color:var(--fg-2); opacity:.75 }
+.result__price {
+  font-family:var(--font-display); font-weight:600;
+  font-size:clamp(30px,4vw,44px); line-height:1.1; margin:12px 0 0;
+  font-variant-numeric:tabular-nums;
+}
+.result__price small { display:block; font-size:15px; font-weight:400; opacity:.65; margin-top:8px; font-family:var(--font-sans) }
+.result__rows { margin:22px 0 0; border-top:1px solid rgba(42,39,36,.12) }
+.result__row { display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-bottom:1px solid rgba(42,39,36,.12); font-size:14px }
+.result__row dt { color:var(--fg-2); opacity:.8 }
+.result__row dd { margin:0; font-weight:500; text-align:right }
+.result__note { font-size:13px; line-height:1.5; color:var(--fg-2); opacity:.8; margin:20px 0 0 }
+.result__actions { display:flex; flex-direction:column; gap:10px; margin-top:22px }
+.result__actions .btn { text-align:center; justify-content:center }
+
+/* Наглядность размера камня */
+.size-vis { margin-top:22px; display:flex; align-items:center; gap:16px }
+.size-vis__stone {
+  border-radius:50%; flex:none;
+  background:radial-gradient(120% 120% at 32% 26%, #fff 0%, #E7E3DC 42%, #B9B2A6 100%);
+  box-shadow:0 2px 10px rgba(42,39,36,.22), inset 0 0 0 1px rgba(42,39,36,.14);
+}
+.size-vis__cap { font-size:13px; color:var(--fg-2); line-height:1.45 }
+
+.terms { background:var(--bg-ink); color:var(--fg-inv) }
+.terms__grid { margin-top:clamp(32px,4vw,52px); display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:clamp(24px,3vw,44px) }
+.terms .h2 { margin-bottom:0 }
+.terms h3 { font-family:var(--font-display); font-size:19px; font-weight:600; margin:0 0 10px }
+.terms p { font-size:15px; line-height:1.6; color:rgba(250,244,239,.72); margin:0 }
+
+@media (max-width:900px) {
+  .calc__grid { grid-template-columns:1fr }
+  .result { position:static }
+  /* Обёртка групп кнопок: display:contents убирает лишний уровень,
+   поэтому кнопки переносятся в общем потоке строки фильтров. */
+.filters__group { display:contents }
+.filters__label--inline { min-width:0 }
+.filters__label { min-width:0; width:100%; margin-bottom:2px }
+  .filters { padding:14px var(--gutter) }
+  .grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr)); gap:12px }
+  .card__body { padding:12px 12px 14px; gap:6px }
+  .card__title { font-size:16px }
+  .card__price { font-size:15px }
+  .card__ask { padding:10px 12px; font-size:13px }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .chip, .card, .card__ask, .toast { transition:none }
+}
+
+/* ── Предпросмотр огранки в калькуляторе ── */
+.cut-preview { display:grid; grid-template-columns:minmax(0,200px) minmax(0,1fr); gap:20px; align-items:center; margin:8px 0 4px }
+.cut-preview__photo { width:100%; height:auto; display:block; border-radius:2px }
+.cut-preview__diagram { width:110px; height:auto; display:block; margin-bottom:10px }
+.cut-preview__side { min-width:0 }
+.result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
+.result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
+#r-mm-row[hidden] { display:none }
+
+@media (max-width:900px) {
+  .cut-preview { grid-template-columns:minmax(0,140px) minmax(0,1fr); gap:14px }
+  .cut-preview__diagram { width:84px }
+}

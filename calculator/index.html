@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  img-src 'self';
+  style-src 'self';
+  font-src 'self';
+  script-src 'self';
+  connect-src 'self';
+  base-uri 'none';
+  form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<title>Калькулятор изделия — Ксения Костина, геммолог GIA</title>
+<meta name="description" content="Ориентировочная стоимость кольца, серёг-пусет, теннисного браслета и колье с бриллиантами. Цены из каталога 2026 года, срок изготовления 9–14 дней, сертификат GIA.">
+
+<link rel="canonical" href="https://shbshv-czec.github.io/kseniakostina/calculator/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Ксения Костина — эксперт-геммолог GIA">
+<meta property="og:url" content="https://shbshv-czec.github.io/kseniakostina/calculator/">
+<meta property="og:title" content="Калькулятор изделия — Ксения Костина">
+<meta property="og:description" content="Прикиньте стоимость кольца, пусет, браслета или колье с бриллиантами до разговора.">
+<meta property="og:image" content="https://shbshv-czec.github.io/kseniakostina/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preload" href="../assets/fonts/playfair-display-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/montserrat-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/pages.css">
+<script src="../assets/js/app.js" defer></script>
+<script src="../assets/js/calculator.js" defer></script>
+</head>
+
+<body>
+<div class="page">
+
+<nav class="nav" aria-label="Основная навигация">
+  <div class="nav__inner">
+    <a href="../"><img class="nav__logo" src="../assets/img/logo-nav.webp" alt="KSENIA KOSTINA — GEMSTONE EXPERT" width="340" height="81" fetchpriority="high" decoding="async"></a>
+    <div class="nav__links">
+      <a class="nav__link" href="../#about">Обо мне</a>
+      <a class="nav__link" href="../#stones">Камни</a>
+      <a class="nav__link" href="../catalog/">Каталог</a>
+      <a class="nav__link" href="../calculator/">Калькулятор</a>
+      <a class="nav__link" href="../#faq">FAQ</a>
+      <a class="btn btn--ink nav__cta" href="https://t.me/kseniadiamond">Написать Ксении</a>
+      <button id="burgerBtn" class="nav__burger" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="nav__menu">
+    <a href="../#about">Обо мне</a>
+    <a href="../#stones">Камни</a>
+    <a href="../catalog/">Каталог</a>
+    <a href="../calculator/">Калькулятор</a>
+    <a href="../#faq">FAQ</a>
+  </div>
+</nav>
+
+<main>
+  <header class="page-head">
+    <div class="wrap">
+      <div class="eyebrow">Калькулятор · изделия на заказ</div>
+      <h1 class="h2">Прикиньте стоимость до разговора</h1>
+      <p class="lead">Выберите изделие, вес и качество камня — покажу ориентировочную вилку и срок изготовления. Это расчёт по типовым позициям каталога: в разделе «Каталог» цены настоящие, за конкретные камни в наличии.</p>
+    </div>
+  </header>
+
+  <p class="count" id="loading">Загружаю расчёт…</p>
+
+  <div class="calc" id="calc" hidden>
+    <div class="calc__grid">
+
+      <div>
+        <div class="field">
+          <span class="field__label" id="l-product">Изделие</span>
+          <div class="field__row" id="f-product" role="group" aria-labelledby="l-product"></div>
+        </div>
+
+        <div class="field">
+          <span class="field__label" id="l-variant">Исполнение</span>
+          <div class="field__row" id="f-variant" role="group" aria-labelledby="l-variant"></div>
+        </div>
+
+        <div class="field" id="grade-field">
+          <span class="field__label" id="l-grade">Качество камня</span>
+          <div class="field__row" id="f-grade" role="group" aria-labelledby="l-grade"></div>
+          <p class="field__hint">«Любое» показывает вилку между обоими вариантами качества.</p>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="weight" id="weight-label">Вес камня</label>
+          <div class="range-val" id="weight-val">1 ct</div>
+          <input class="range" type="range" id="weight" min="1" max="3" step="0.05" value="1"
+                 aria-labelledby="weight-label" aria-describedby="weight-val">
+          <div class="range-ends"><span id="w-min"></span><span id="w-max"></span></div>
+        </div>
+
+        <div class="cut-preview">
+          <img id="cut-img" class="cut-preview__photo" width="560" height="560" alt="" loading="lazy" decoding="async">
+          <div class="cut-preview__side">
+            <img id="cut-diagram" class="cut-preview__diagram" width="300" height="300" alt="" loading="lazy" decoding="async">
+            <p class="field__hint">Так огранка выглядит в изделии и в разрезе. Пример из печатного каталога.</p>
+          </div>
+        </div>
+
+        <div class="size-vis" id="size-vis" hidden>
+          <div class="size-vis__stone" id="size-stone"></div>
+          <p class="size-vis__cap" id="size-cap"></p>
+        </div>
+      </div>
+
+      <aside class="result" id="result" aria-live="polite">
+        <div class="result__label">Ориентировочная стоимость</div>
+        <p class="result__price" id="r-price">—</p>
+        <p class="result__price-note" id="r-price-note"></p>
+
+        <dl class="result__rows">
+          <div class="result__row"><dt>Изделие</dt><dd id="r-item">—</dd></div>
+          <div class="result__row"><dt>Вес</dt><dd id="r-weight">—</dd></div>
+          <div class="result__row"><dt>Качество</dt><dd id="r-grade">—</dd></div>
+          <div class="result__row" id="r-mm-row"><dt>Диаметр камня</dt><dd id="r-mm">—</dd></div>
+          <div class="result__row"><dt>Срок</dt><dd id="r-lead">—</dd></div>
+        </dl>
+
+        <p class="result__note" id="disclaimer"></p>
+
+        <div class="result__actions">
+          <a class="btn btn--paraiba" id="r-discuss" href="https://t.me/kseniadiamond">Обсудить заказ</a>
+          <a class="btn btn--light" id="r-to-catalog" href="../catalog/">Посмотреть камни в наличии</a>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <section class="section terms">
+    <div class="wrap">
+      <div class="eyebrow eyebrow--gold">Условия работы</div>
+      <h2 class="h2">На чём я не экономлю</h2>
+      <div class="terms__grid" id="terms-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="section--footer footer">
+  <div class="wrap cols cols--foot">
+    <div>
+      <img class="footer__logo" src="../assets/img/logo-footer.webp" alt="KSENIA KOSTINA — GEMSTONE EXPERT" width="464" height="110" loading="lazy" decoding="async">
+      <p class="footer__about">Ксения Костина. Эксперт-геммолог GIA. Офисы на Дубайской алмазной бирже и в Бангкоке. Доставка по всему миру.</p>
+    </div>
+    <div class="footer__links">
+      <a href="https://t.me/kseniadiamond"><img src="../assets/img/icon-telegram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Написать лично: @kseniadiamond</a>
+      <a href="https://t.me/diamondbabecloset"><img src="../assets/img/icon-telegram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Витрина: @diamondbabecloset</a>
+      <a href="https://instagram.com/diamondbabe_ksenia"><img src="../assets/img/icon-instagram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Instagram: @diamondbabe_ksenia</a>
+      <a href="https://youtube.com/@diamondbabe.ksenia"><img src="../assets/img/icon-youtube.svg" alt="" width="18" height="18" loading="lazy" decoding="async">YouTube: @diamondbabe.ksenia</a>
+    </div>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

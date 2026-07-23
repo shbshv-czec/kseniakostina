@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  img-src 'self';
+  style-src 'self';
+  font-src 'self';
+  script-src 'self';
+  connect-src 'self';
+  base-uri 'none';
+  form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<title>Камни в наличии — каталог Ксении Костиной, геммолога GIA</title>
+<meta name="description" content="Бриллианты и цветные камни из первых рук по биржевым ценам: изумруды, сапфиры, шпинель, турмалин параиба, танзаниты. Подбор по цвету и бюджету, наличие обновляется из канала-витрины.">
+
+<link rel="canonical" href="https://shbshv-czec.github.io/kseniakostina/catalog/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Ксения Костина — эксперт-геммолог GIA">
+<meta property="og:url" content="https://shbshv-czec.github.io/kseniakostina/catalog/">
+<meta property="og:title" content="Камни в наличии — каталог Ксении Костиной">
+<meta property="og:description" content="Бриллианты и цветные камни из первых рук по биржевым ценам. Подбор по цвету и бюджету.">
+<meta property="og:image" content="https://shbshv-czec.github.io/kseniakostina/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preload" href="../assets/fonts/playfair-display-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/montserrat-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/pages.css">
+<script src="../assets/js/app.js" defer></script>
+<script src="../assets/js/catalog.js" defer></script>
+</head>
+
+<body>
+<div class="page">
+
+<nav class="nav" aria-label="Основная навигация">
+  <div class="nav__inner">
+    <a href="../"><img class="nav__logo" src="../assets/img/logo-nav.webp" alt="KSENIA KOSTINA — GEMSTONE EXPERT" width="340" height="81" fetchpriority="high" decoding="async"></a>
+    <div class="nav__links">
+      <a class="nav__link" href="../#about">Обо мне</a>
+      <a class="nav__link" href="../#stones">Камни</a>
+      <a class="nav__link" href="../catalog/">Каталог</a>
+      <a class="nav__link" href="../calculator/">Калькулятор</a>
+      <a class="nav__link" href="../#faq">FAQ</a>
+      <a class="btn btn--ink nav__cta" href="https://t.me/kseniadiamond">Написать Ксении</a>
+      <button id="burgerBtn" class="nav__burger" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="nav__menu">
+    <a href="../#about">Обо мне</a>
+    <a href="../#stones">Камни</a>
+    <a href="../catalog/">Каталог</a>
+    <a href="../calculator/">Калькулятор</a>
+    <a href="../#faq">FAQ</a>
+  </div>
+</nav>
+
+<main>
+  <header class="page-head">
+    <div class="wrap">
+      <div class="eyebrow">Каталог · наличие и цены</div>
+      <h1 class="h2">Выберите камень по цвету и бюджету</h1>
+      <p class="lead">Это ровно тот вопрос, который я задаю каждому в переписке. Здесь он отвечает сам: выберите цвет и сумму — покажу, что есть прямо сейчас. Цены биржевые, камни из первых рук.</p>
+    </div>
+  </header>
+
+  <section class="filters" aria-label="Фильтры каталога">
+    <div class="wrap">
+      <div class="filters__row">
+        <span class="filters__label" id="l-stone">Камень</span>
+        <div id="f-stone" class="filters__group" role="group" aria-labelledby="l-stone"></div>
+      </div>
+      <div class="filters__row">
+        <span class="filters__label" id="l-budget">Бюджет</span>
+        <div id="f-budget" class="filters__group" role="group" aria-labelledby="l-budget"></div>
+      </div>
+      <div class="filters__row">
+        <span class="filters__label" id="l-type">Изделие</span>
+        <div id="f-type" class="filters__group" role="group" aria-labelledby="l-type"></div>
+      </div>
+      <div class="filters__row">
+        <span class="filters__label">Показ</span>
+        <button id="t-stock" type="button" class="chip" aria-pressed="false">Только в наличии</button>
+        <button id="t-sold" type="button" class="chip" aria-pressed="false">Показать проданные</button>
+        <label class="filters__label filters__label--inline" for="sort">Сортировка</label>
+        <select id="sort" class="select">
+          <option value="default">Сначала в наличии</option>
+          <option value="cheap">Сначала дешевле</option>
+          <option value="costly">Сначала дороже</option>
+          <option value="carat">Больше карат</option>
+        </select>
+        <button id="reset" type="button" class="reset" hidden>Сбросить фильтры</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="count" id="count" role="status" aria-live="polite">Загружаю каталог…</p>
+
+  <ul class="grid" id="grid"></ul>
+  <div class="sentinel" id="sentinel" aria-hidden="true"></div>
+
+  <div class="empty" id="empty" hidden>
+    <h2>Под такой запрос в наличии ничего нет</h2>
+    <p>Напишите — подберу отдельно. Сток пополняется быстрее, чем попадает на сайт, и многое приходит под конкретный запрос.</p>
+    <a class="btn btn--paraiba" href="https://t.me/kseniadiamond">Написать Ксении</a>
+  </div>
+
+  <div class="more" id="more" hidden>
+    <p>Не нашли нужное? Посчитайте изделие на заказ — покажу ориентировочную стоимость и срок.</p>
+    <a class="btn btn--ink" href="../calculator/">Посчитать изделие</a>
+  </div>
+</main>
+
+<footer class="section--footer footer">
+  <div class="wrap cols cols--foot">
+    <div>
+      <img class="footer__logo" src="../assets/img/logo-footer.webp" alt="KSENIA KOSTINA — GEMSTONE EXPERT" width="464" height="110" loading="lazy" decoding="async">
+      <p class="footer__about">Ксения Костина. Эксперт-геммолог GIA. Офисы на Дубайской алмазной бирже и в Бангкоке. Доставка по всему миру.</p>
+    </div>
+    <div class="footer__links">
+      <a href="https://t.me/kseniadiamond"><img src="../assets/img/icon-telegram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Написать лично: @kseniadiamond</a>
+      <a href="https://t.me/diamondbabecloset"><img src="../assets/img/icon-telegram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Витрина: @diamondbabecloset</a>
+      <a href="https://instagram.com/diamondbabe_ksenia"><img src="../assets/img/icon-instagram.svg" alt="" width="18" height="18" loading="lazy" decoding="async">Instagram: @diamondbabe_ksenia</a>
+      <a href="https://youtube.com/@diamondbabe.ksenia"><img src="../assets/img/icon-youtube.svg" alt="" width="18" height="18" loading="lazy" decoding="async">YouTube: @diamondbabe.ksenia</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+</body>
+</html>
