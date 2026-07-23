@@ -230,12 +230,15 @@
     updateWeightLabel();
     markTicks();
 
+    // Фото — конкретного изделия под выбранное исполнение (item-<id>),
+    // а не обобщённое по огранке: иначе у серёг показывалось кольцо.
     var img = $('#cut-img');
-    img.src = '../assets/img/cuts/' + variant.cut + '.webp';
-    img.alt = 'Пример изделия: огранка ' + variant.cut;
-    var dia = $('#cut-diagram');
-    dia.src = '../assets/img/cuts/' + variant.cut + '-diagram.webp';
-    dia.alt = '';
+    img.src = '../assets/img/cuts/item-' + variant.id + '.webp';
+    img.alt = product.name + ', ' + variant.name;
+    // Фото-референс размера — по типу изделия (рука / ухо / запястье / шея).
+    var ref = $('#size-ref');
+    ref.src = '../assets/img/cuts/size-' + product.id + '.webp';
+    ref.alt = 'Наглядное сравнение размеров бриллиантов: ' + product.name.toLowerCase();
     render();
   }
 
