@@ -152,7 +152,29 @@
     renderVariants();
   }
 
+  // Фраза огранки для изделий с единственным исполнением
+  var CUT_PHRASE = {
+    krug: 'Круглые бриллианты', oval: 'Фантазийная огранка',
+    grusha: 'Фантазийная огранка', podushka: 'Огранка кушон',
+  };
+
   function renderVariants() {
+    // Когда исполнение одно (браслет, колье), выбирать нечего — кнопку
+    // прячем, а её содержание показываем строкой, чтобы не создавать
+    // ощущение обрезанного выбора. Разные веса при этом остаются
+    // за ползунком ниже.
+    if (product.variants.length < 2) {
+      $('#l-variant').hidden = true;
+      $('#f-variant').hidden = true;
+      var solo = $('#variant-solo');
+      solo.hidden = false;
+      solo.textContent = (CUT_PHRASE[variant.cut] || variant.name) +
+        ', ' + variant.name + '. Вес — ниже.';
+      return;
+    }
+    $('#l-variant').hidden = false;
+    $('#f-variant').hidden = false;
+    $('#variant-solo').hidden = true;
     chips($('#f-variant'),
       product.variants.map(function (v) { return { id: v.id, name: v.name }; }),
       variant.id,
@@ -184,9 +206,29 @@
     if (weight === undefined || weight < min || weight > max) weight = ws[Math.floor(ws.length / 2)];
     slider.value = weight;
     $('#weight-label').textContent = (product.weight_label || variant.weight_label || 'Вес камня');
-    $('#w-min').textContent = min + ' ct';
-    $('#w-max').textContent = max + ' ct';
+
+    // Табличные точки под ползунком: показывают опорные веса каталога
+    // (между ними идёт интерполяция) и заодно служат кнопками — попасть
+    // ползунком точно в 8,3 ct трудно, а кликом легко.
+    var ticks = $('#range-ticks');
+    ticks.innerHTML = '';
+    ws.forEach(function (w) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tick';
+      b.textContent = String(w).replace('.', ',');
+      b.setAttribute('aria-pressed', String(w === weight));
+      b.addEventListener('click', function () {
+        weight = w;
+        slider.value = w;
+        updateWeightLabel();
+        markTicks();
+        render();
+      });
+      ticks.appendChild(b);
+    });
     updateWeightLabel();
+    markTicks();
 
     var img = $('#cut-img');
     img.src = '../assets/img/cuts/' + variant.cut + '.webp';
@@ -195,6 +237,15 @@
     dia.src = '../assets/img/cuts/' + variant.cut + '-diagram.webp';
     dia.alt = '';
     render();
+  }
+
+  function markTicks() {
+    // Точка «нажата» только когда вес попал ровно в неё
+    var ticks = $('#range-ticks').children;
+    for (var i = 0; i < ticks.length; i++) {
+      ticks[i].setAttribute('aria-pressed',
+        String(parseFloat(ticks[i].textContent.replace(',', '.')) === weight));
+    }
   }
 
   function updateWeightLabel() {
@@ -217,6 +268,7 @@
     $('#weight').addEventListener('input', function (e) {
       weight = parseFloat(e.target.value);
       updateWeightLabel();
+      markTicks();
       render();
     });
 
