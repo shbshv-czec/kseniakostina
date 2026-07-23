@@ -1,0 +1,24 @@
+# Заголовки для Cloudflare Pages / Netlify.
+# GitHub Pages этот файл игнорирует — там заголовки задать нельзя,
+# поэтому CSP продублирована в <meta> внутри index.html.
+
+/*
+  Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Картинки и шрифты не меняются под своими именами — кэшируем надолго.
+/assets/img/*
+  Cache-Control: public, max-age=2592000
+
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Код может меняться при правках — перепроверяем каждый раз.
+/assets/css/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/assets/js/*
+  Cache-Control: public, max-age=3600, must-revalidate

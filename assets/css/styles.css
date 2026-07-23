@@ -1,0 +1,748 @@
+/* ============================================================
+   kseniakostina.ru
+
+   Порядок: шрифты → токены → база → раскладка → типографика →
+   компоненты → секции → адаптив → уважение к prefers-reduced-motion.
+
+   Инлайновых стилей в разметке нет, поэтому в адаптиве не нужен
+   ни один !important.
+   ============================================================ */
+
+
+/* ────────────────────────────────  Шрифты  ──────────────────────────────── */
+
+/* Playfair Display — инстанс вариативного шрифта на wght=600
+   (в разметке используется только 600), сабсет latin + cyrillic. */
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('../fonts/playfair-display-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Montserrat — сабсеты Google Fonts.
+   ВНИМАНИЕ: веса 400/500/600 намеренно ссылаются на один и тот же файл
+   Regular — ровно так же, как в исходном бандле. Это сохраняет текущий
+   вид: текст с font-weight:500 и 600 рисуется начертанием Regular,
+   браузер его не синтезирует, потому что вес объявлен явно.
+   Чтобы получить настоящие Medium/SemiBold — нужны отдельные файлы. */
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:400; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic-ext.woff2') format('woff2');
+  unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:400; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic.woff2') format('woff2');
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:400; font-display:swap;
+  src:url('../fonts/montserrat-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:500; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic-ext.woff2') format('woff2');
+  unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:500; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic.woff2') format('woff2');
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:500; font-display:swap;
+  src:url('../fonts/montserrat-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:600; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic-ext.woff2') format('woff2');
+  unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:600; font-display:swap;
+  src:url('../fonts/montserrat-cyrillic.woff2') format('woff2');
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family:'Montserrat'; font-style:normal; font-weight:600; font-display:swap;
+  src:url('../fonts/montserrat-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+
+/* ────────────────────────────────  Токены  ─────────────────────────────── */
+
+:root {
+  /* Поверхности */
+  --bg-ivory:#FAF4EF;
+  --bg-cream:#F3EDE4;
+  --bg-white:#FFFFFF;
+  --bg-ink:#2A2724;
+
+  /* Текст */
+  --fg-1:#2A2724;   /* основной */
+  --fg-2:#1F1C19;   /* приглушённый, на светлом */
+  --fg-inv:#FAF4EF; /* на тёмном */
+
+  /* Золото */
+  --gold:#C29A3B;
+  --gold-champagne:#C9AE7C;
+
+  /* Параиба — цвет действия */
+  --paraiba-1:#2BABC1;
+  --paraiba-2:#1C97AC;
+
+  /* Градиенты */
+  --grad-ink:linear-gradient(180deg,#3B3733 0%,#2A2724 100%);
+  --grad-paraiba:linear-gradient(180deg,var(--paraiba-1) 0%,var(--paraiba-2) 100%);
+  --grad-light:linear-gradient(180deg,#FFFFFF 0%,#F3EDE4 100%);
+  --grad-hero:linear-gradient(170deg,#FFFFFF 0%,#F7F4F0 55%,#EFECE7 100%);
+  --grad-platinum:linear-gradient(115deg,#EDECE9 0%,#FAFAF8 22%,#E4E2DE 45%,#F7F6F3 68%,#EAE8E4 100%);
+  --grad-course:linear-gradient(160deg,#332F2B 0%,#2A2724 60%,#211E1C 100%);
+  --grad-request:linear-gradient(170deg,#FAF4EF 0%,#F3EDE4 60%,#EFE8DD 100%);
+
+  /* Тени */
+  --shadow-ink:0 10px 26px rgba(42,39,36,0.28);
+  --shadow-paraiba:0 10px 28px rgba(28,151,172,0.35);
+  --shadow-light:0 10px 26px rgba(0,0,0,0.3);
+  --shadow-gem:drop-shadow(-6px 6px 20px rgba(42,39,36,0.3));
+
+  /* Типографика */
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-sans:'Proxima Nova','Montserrat','Avenir Next',system-ui,sans-serif;
+
+  /* Раскладка */
+  --wrap:1360px;
+  --gutter:clamp(20px,5vw,64px);
+  --gap-col:clamp(40px,6vw,96px);
+  --pad-section:clamp(72px,10vw,140px);
+
+  /* Движение */
+  --ease:cubic-bezier(0.22,0.61,0.36,1);
+  --dur-reveal:1s;
+  --dur-faq:.55s;
+}
+
+
+/* ─────────────────────────────────  База  ──────────────────────────────── */
+
+html { scroll-behavior:smooth }
+
+body {
+  margin:0;
+  background:var(--bg-white);
+  color:var(--fg-1);
+  font-family:var(--font-sans);
+  font-size:17px;
+  line-height:1.5;
+  font-weight:400;
+}
+
+.page { position:relative }
+
+/* Глобального img{max-width:100%} здесь намеренно нет: портрет на первом
+   экране шире своего контейнера (114%), и такое правило его обрезало бы.
+   Размеры каждой картинки заданы явно. */
+
+a { color:var(--fg-1) }
+
+strong { font-weight:600 }
+
+summary::-webkit-details-marker { display:none }
+
+/* Видимый фокус с клавиатуры — по умолчанию его съедали инлайновые стили */
+:focus-visible {
+  outline:2px solid var(--paraiba-2);
+  outline-offset:3px;
+}
+
+
+/* ───────────────────────────────  Раскладка  ───────────────────────────── */
+
+.wrap {
+  max-width:var(--wrap);
+  margin-inline:auto;
+}
+
+.wrap--narrow { max-width:900px }
+
+/* Колонка текста внутри .wrap — прижата влево, поэтому не .wrap--* */
+.text-col { max-width:720px }
+
+/* Заголовок в строке-флексе (сохраняет исходную обёртку вокруг h2) */
+.h2-row { display:flex; align-items:center; gap:clamp(14px,1.8vw,24px) }
+
+.section { padding:var(--pad-section) var(--gutter) }
+.section--stats  { padding:clamp(64px,8vw,112px) var(--gutter) }
+.section--band   { padding:clamp(48px,6vw,88px) var(--gutter) }
+.section--course { padding:clamp(72px,10vw,120px) var(--gutter) }
+.section--footer { padding:clamp(56px,8vw,96px) var(--gutter) }
+
+/* Две колонки, схлопываются в одну ниже 400px на колонку */
+.cols {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));
+  gap:var(--gap-col);
+  align-items:center;
+}
+.cols--top   { align-items:start }
+.cols--stats { grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:32px }
+.cols--foot  { grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
+               gap:clamp(32px,5vw,64px); align-items:start }
+
+/* Кадрирующая рамка вокруг фотографий */
+.media { overflow:hidden }
+.media > img { width:100%; height:auto; display:block }
+
+/* Портретный кадр фиксированной высоты — фото обрезается по центру */
+.media--tall { max-height:620px }
+.media--tall > img {
+  height:100%;
+  max-height:620px;
+  object-fit:cover;
+}
+.media--trust > img  { object-position:center 30% }
+.media--course > img { object-position:center 28% }
+
+
+/* ──────────────────────────────  Типографика  ──────────────────────────── */
+
+.display,
+.h2 {
+  font-family:var(--font-display);
+  font-weight:600;
+  margin:0;
+}
+
+.display {          /* заголовок первого экрана */
+  font-size:clamp(38px,4.8vw,64px);
+  line-height:1.08;
+  letter-spacing:1.4px;
+  margin-top:28px;
+}
+
+.h2 {               /* заголовки секций */
+  font-size:clamp(32px,4.3vw,56px);
+  line-height:1.15;
+  letter-spacing:1.1px;
+}
+
+.h2--offset { margin-top:20px }
+
+.subhead {          /* подзаголовок первого экрана */
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:21px;
+  line-height:1.5;
+  letter-spacing:0.44px;
+  margin:24px 0 0;
+  max-width:560px;
+  color:var(--fg-2);
+}
+
+.eyebrow {          /* надзаголовок капсом */
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--fg-2);
+}
+.eyebrow--gold { color:var(--gold-champagne) }
+
+.lead { margin:32px 0 0 }   /* первый абзац после заголовка */
+.p    { margin:18px 0 0 }   /* последующие абзацы */
+.p--tight { margin:16px 0 0 }
+
+/* В «Курсе CARAT» заголовок уже отбит от надзаголовка, поэтому
+   первый абзац подходит ближе — 24px вместо 32px. */
+.lead--near { margin-top:24px }
+
+.quote {
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(30px,4vw,52px);
+  line-height:1.3;
+  letter-spacing:1.1px;
+  margin:0;
+  max-width:880px;
+  text-align:center;
+  color:var(--fg-inv);
+}
+
+
+/* ──────────────────────────────  Компоненты  ───────────────────────────── */
+
+/* Кнопка. Блик по наведению — псевдоэлемент, поэтому нужен overflow. */
+.btn {
+  position:relative;
+  overflow:hidden;
+  display:inline-block;
+  font-size:16px;
+  font-weight:500;
+  padding:14px 30px;
+  border-radius:2px;
+  text-decoration:none;
+  transition:filter .18s ease;
+}
+.btn:hover { filter:brightness(1.05) }
+
+.btn::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 130% 170% at 50% 135%,
+    rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.14) 45%, rgba(255,255,255,0) 72%);
+  opacity:0;
+  transition:opacity .22s ease;
+  pointer-events:none;
+}
+.btn:hover::after { opacity:1 }
+
+.btn--ink {
+  background:var(--grad-ink);
+  box-shadow:var(--shadow-ink);
+  color:var(--fg-inv);
+}
+.btn--paraiba {
+  background:var(--grad-paraiba);
+  box-shadow:var(--shadow-paraiba);
+  color:var(--bg-white);
+}
+.btn--light {
+  background:var(--grad-light);
+  box-shadow:var(--shadow-light);
+  color:var(--fg-1);
+}
+.btn--light::after {
+  background:radial-gradient(ellipse 130% 170% at 50% 135%,
+    rgba(194,154,59,0.32) 0%, rgba(201,174,124,0.1) 45%, rgba(201,174,124,0) 72%);
+}
+
+.btn--spaced { margin-top:44px }
+
+/* Текстовая ссылка-действие рядом с кнопкой */
+.link-action {
+  color:var(--paraiba-2);
+  font-size:16px;
+  font-weight:500;
+  text-decoration:none;
+}
+
+/* Ряд «кнопка + ссылка» */
+.actions {
+  display:flex;
+  gap:20px 28px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:40px;
+}
+.actions--wide { margin-top:44px }
+
+
+/* ──────────────────────────  Шапка и навигация  ────────────────────────── */
+
+.nav {
+  position:fixed;
+  inset:0 0 auto;
+  z-index:30;
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(16px) saturate(1.5);
+  border-bottom:1px solid rgba(42,39,36,0.06);
+}
+
+.nav__inner {
+  max-width:var(--wrap);
+  margin-inline:auto;
+  padding:18px 48px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.nav__logo { width:168px; height:auto }
+
+.nav__links {
+  display:flex;
+  align-items:center;
+  gap:30px;
+  font-size:13px;
+  font-weight:500;
+  color:var(--fg-2);
+}
+
+.nav__link { text-decoration:none; color:inherit }
+
+/* Кнопка в шапке мельче обычной — под размер строки навигации */
+.nav__cta { font-size:13px; padding:12px 27px }
+
+/* Бургер — настоящая <button>, поэтому снимаем рамку и фон браузера */
+.nav__burger {
+  display:none;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer;
+  padding:8px 2px;
+  border:0;
+  background:none;
+  appearance:none;
+}
+.nav__burger span {
+  width:22px;
+  height:1.5px;
+  background:var(--bg-ink);
+  display:block;
+}
+
+.nav__menu {
+  display:none;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:26px;
+  background:rgba(255,255,255,0.97);
+  border-top:1px solid rgba(42,39,36,0.08);
+  padding:34px 28px 44px;
+  font-size:19px;
+  font-weight:500;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+}
+.nav__menu[data-open="1"] { display:flex }
+.nav__menu a { text-decoration:none; color:var(--bg-ink) }
+
+
+/* ─────────────────────────────  Первый экран  ──────────────────────────── */
+
+.hero {
+  background:var(--grad-hero);
+  padding:clamp(90px,12vh,130px) var(--gutter) 0;
+  overflow:hidden;
+  position:relative;
+}
+
+.hero__grid {
+  max-width:var(--wrap);
+  margin-inline:auto;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
+  gap:clamp(24px,4vw,64px);
+  align-items:stretch;
+  min-height:min(calc(100vh - 220px),780px);
+}
+
+.hero__text {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:16px 0 56px;
+}
+
+.hero__art {
+  position:relative;
+  min-height:clamp(440px,62vh,660px);
+}
+
+/* Две мягкие подсветки за портретом */
+.hero__glow {
+  position:absolute;
+  inset:-10% -14%;
+  background:radial-gradient(ellipse 42% 38% at 50% 66%,
+    rgba(214,209,201,0.85) 0%, rgba(222,217,210,0.4) 40%, rgba(239,236,231,0) 68%);
+}
+.hero__glow--paraiba {
+  background:radial-gradient(ellipse 30% 26% at 66% 72%,
+    rgba(47,192,218,0.09) 0%, rgba(47,192,218,0) 65%);
+}
+
+.hero__portrait {
+  position:absolute;
+  left:-7%;
+  bottom:0;
+  width:114%;
+  height:115%;
+  object-fit:contain;
+  object-position:bottom center;
+  display:block;
+}
+
+/* «Крошка» — залипающий декор справа, позицию по вертикали ведёт JS */
+.crumb {
+  position:fixed;
+  right:0;
+  top:100vh;
+  z-index:5;
+  width:clamp(131px,15.6vw,259px);
+  height:auto;
+  filter:drop-shadow(0 24px 36px rgba(42,39,36,0.22));
+  pointer-events:none;
+}
+
+/* Логотипы изданий */
+.press {
+  display:flex;
+  align-items:center;
+  gap:clamp(16px,2vw,30px);
+  flex-wrap:nowrap;
+  margin-top:56px;
+  color:var(--fg-2);
+  opacity:0.9;
+  min-width:0;
+}
+.press img { width:auto; display:block }
+.press__forbes      { height:clamp(12px,1.25vw,17px) }
+.press__kommersant  { height:clamp(9px,0.95vw,13px) }
+.press__rbc         { height:clamp(10px,1.1vw,15px) }
+.press__robb        { height:clamp(9px,1vw,14px) }
+.press__marieclaire { height:clamp(8px,0.9vw,12px) }
+
+
+/* ────────────────────────────────  Секции  ─────────────────────────────── */
+
+.main { position:relative; z-index:2 }
+
+/* Платиновый перелив — фон «Обо мне» и «Цифр» */
+.platinum {
+  background:var(--grad-platinum);
+  background-size:220% 220%;
+  animation:platinumSheen 16s ease-in-out infinite;
+}
+@keyframes platinumSheen {
+  0%   { background-position:0% 50% }
+  50%  { background-position:100% 50% }
+  100% { background-position:0% 50% }
+}
+
+.about { overflow:hidden; position:relative }
+/* На мобильном фото уезжает наверх — смягчаем стык с первым экраном */
+.about::before { content:none }
+
+/* Полоса с цитатой на фоне фотографии */
+.quote-band {
+  background-image:
+    linear-gradient(rgba(20,18,16,0.55), rgba(20,18,16,0.55)),
+    url('../img/quote-bg.webp');
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+.quote-band__inner { display:flex; justify-content:center }
+
+.stones { background:var(--bg-white); position:relative; overflow:hidden }
+
+/* Пара камней, плавающая справа от текста */
+.gems {
+  position:absolute;
+  right:clamp(24px,6vw,110px);
+  top:50%;
+  margin-top:-190px;
+  width:clamp(210px,20vw,286px);
+  height:clamp(360px,34vw,480px);
+  pointer-events:none;
+}
+.gems__slot { position:absolute; pointer-events:none }
+.gems__slot--white  { top:0; right:0; width:56% }
+.gems__slot--yellow { bottom:0; left:0; width:65% }
+.gems img {
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:auto;
+  display:block;
+  filter:var(--shadow-gem);
+  /* базу масштаба ведёт JS через --gem-scale */
+  transform:scale(var(--gem-scale,1));
+}
+
+.stat { text-align:center }
+.stat__value {
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(52px,6vw,88px);
+  line-height:1.05;
+  letter-spacing:1.6px;
+  color:var(--fg-1);
+}
+.stat__note {
+  margin:16px auto 0;
+  color:var(--fg-2);
+  max-width:380px;
+}
+
+.trust { background:var(--bg-white) }
+
+/* Логотипы лабораторий — обесцвечены, оживают по наведению */
+.labs {
+  display:flex;
+  align-items:center;
+  gap:clamp(16px,2.2vw,34px);
+  flex-wrap:nowrap;
+  margin-top:52px;
+}
+.labs img {
+  height:26px;
+  width:auto;
+  filter:grayscale(1);
+  opacity:0.6;
+  transition:filter .15s ease, opacity .15s ease;
+}
+.labs img:hover { filter:grayscale(0); opacity:1 }
+/* Селектор с img — иначе .labs img выигрывает по весу и высота не меняется */
+.labs img.labs__sm { height:17px; margin:4.5px 0 }
+
+.course { background:var(--grad-course); color:var(--fg-inv) }
+.course p { color:var(--fg-inv) }
+
+.faq { background:var(--bg-white) }
+.faq__list { margin-top:56px }
+
+.faq details {
+  border-top:1px solid var(--gold-champagne);
+  padding:24px 0;
+}
+/* Закрытый вопрос добирает 14px — ровно столько занимал верхний отступ
+   свёрнутого ответа в прежней вёрстке. Так ритм списка не изменился,
+   хотя ответ теперь честно убран из документа, а не спрятан высотой. */
+.faq details:not([open]) { padding-bottom:38px }
+.faq details:last-child { border-bottom:1px solid var(--gold-champagne) }
+
+.faq summary {
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:22px;
+  letter-spacing:0.44px;
+  cursor:pointer;
+  list-style:none;
+}
+
+.faq details p {
+  margin:14px 0 0;
+  color:var(--fg-2);
+  overflow:hidden;
+  transition:max-height var(--dur-faq) var(--ease), opacity var(--dur-faq) ease;
+}
+
+.request { background:var(--grad-request); overflow:hidden }
+
+.footer { background:var(--bg-ink); color:var(--fg-inv) }
+.footer__logo { width:230px; height:auto }
+.footer__about {
+  margin:28px 0 0;
+  font-size:15px;
+  line-height:1.6;
+  color:rgba(250,244,239,0.7);
+  max-width:440px;
+}
+.footer__links {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  font-size:15px;
+}
+.footer__links a {
+  color:var(--fg-inv);
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.footer__links img { width:18px; height:18px }
+
+
+/* ───────────────────────  Появление и параллакс  ───────────────────────── */
+
+/* Стартовое состояние ставит JS (класс на <html>), чтобы при выключенном
+   JS весь текст остался видимым. */
+.js [data-reveal] {
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity var(--dur-reveal) var(--ease), transform var(--dur-reveal) var(--ease);
+}
+.js [data-reveal].is-revealed {
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Параллакс: базовый масштаб задан здесь, сдвиг подставляет JS */
+.plx { transform:scale(var(--plx-scale,1)) translateY(var(--plx-y,0px)) }
+.plx--about   { --plx-scale:1.12 }
+.plx--request { --plx-scale:1.08 }
+
+
+/* ────────────────────────────────  Адаптив  ────────────────────────────── */
+
+@media (max-width:1150px) {
+  .gems {
+    position:relative;
+    right:auto;
+    top:auto;
+    margin:56px auto 0;
+    width:240px;
+    height:400px;
+  }
+}
+
+@media (max-width:1060px) {
+  .nav__inner  { padding:14px 20px }
+  .nav__logo   { width:128px }
+  .nav__links  { gap:18px }
+  .nav__link   { display:none }
+  .nav__cta    { white-space:nowrap; font-size:14px; padding:10px 18px }
+  .nav__burger { display:flex }
+}
+
+@media (max-width:900px) {
+  .hero { padding-top:100px }
+
+  /* Порядок блоков на мобильном. Раньше это были #heroText>div:nth-child(N)
+     — любая вставка <div> ломала раскладку. Теперь порядок держат классы. */
+  .hero__grid { display:flex; flex-direction:column }
+  .hero__text { display:contents }
+  .hero__eyebrow  { order:1 }
+  .display        { order:2 }
+  .subhead        { order:4; margin-top:32px }
+  .hero__actions  { order:5 }
+  .press          { order:6; justify-content:space-between; gap:0; width:100%; margin-bottom:64px }
+
+  .hero__art { order:3; min-height:480px; margin:0 -20px }
+  .hero__portrait { left:0; width:100%; height:100% }
+
+  .crumb { width:104px }
+
+  .press__forbes      { height:3.4vw }
+  .press__kommersant  { height:2.6vw }
+  .press__rbc         { height:3vw }
+  .press__robb        { height:2.8vw }
+  .press__marieclaire { height:2.4vw }
+
+  /* Фото «Обо мне» встаёт над текстом */
+  .about__cols  { display:flex; flex-direction:column }
+  .about__media { order:2 }
+  .about__text  { order:1 }
+  .about::before {
+    content:"";
+    position:absolute;
+    inset:0 0 auto;
+    height:90px;
+    background:linear-gradient(180deg,#EFECE7 0%,rgba(239,236,231,0) 100%);
+    pointer-events:none;
+    z-index:1;
+  }
+
+  .labs { justify-content:space-between; gap:0; width:100% }
+  .labs img { height:16px }
+  .labs img.labs__sm { height:11px }
+
+  /* Телефону — свой файл фона, вдвое легче десктопного */
+  .quote-band {
+    background-image:
+      linear-gradient(rgba(20,18,16,0.55), rgba(20,18,16,0.55)),
+      url('../img/quote-bg-800.webp');
+  }
+}
+
+
+/* ─────────────────────  Уважение к настройкам движения  ────────────────── */
+
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto }
+
+  /* Появление, переливы и плавная гармошка выключаются целиком.
+     Параллакс и счётчики отключает JS — он читает ту же медиа-фичу. */
+  .js [data-reveal] {
+    opacity:1;
+    transform:none;
+    transition:none;
+  }
+  .platinum { animation:none }
+  .faq details p { transition:none }
+  .btn, .btn::after, .labs img { transition:none }
+  .quote-band { background-attachment:scroll }
+}

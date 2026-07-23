@@ -1,0 +1,5 @@
+# Индексировать разрешено всё.
+User-agent: *
+Allow: /
+
+Sitemap: https://shbshv-czec.github.io/kseniakostina/sitemap.xml
