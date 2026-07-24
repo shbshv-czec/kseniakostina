@@ -232,9 +232,16 @@
 
     // Фото — конкретного изделия под выбранное исполнение (item-<id>),
     // а не обобщённое по огранке: иначе у серёг показывалось кольцо.
+    // У фантазийной огранки нет одной формы, поэтому в прайсе такие
+    // варианты ссылаются на общий кадр со всеми 12 формами (variant.photo).
+    // Он широкий и с подписями — показываем его во всю колонку.
     var img = $('#cut-img');
-    img.src = '../assets/img/cuts/item-' + variant.id + '.webp';
-    img.alt = product.name + ', ' + variant.name;
+    var wide = !!variant.photo;
+    img.src = '../assets/img/cuts/' + (variant.photo || 'item-' + variant.id) + '.webp';
+    img.alt = wide
+      ? 'Формы фантазийной огранки: подушка, радиант, принцесса, ашер, круг, сердце, триллиант, овал, груша, эмеральд, маркиз, багет'
+      : product.name + ', ' + variant.name;
+    img.classList.toggle('cut-preview__photo--wide', wide);
     // Фото-референс размера — по типу изделия (рука / ухо / запястье / шея).
     var ref = $('#size-ref');
     ref.src = '../assets/img/cuts/size-' + product.id + '.webp';

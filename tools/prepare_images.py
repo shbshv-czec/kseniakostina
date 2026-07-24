@@ -182,11 +182,10 @@ def main(src):
     PRODUCTS = {
         'soliter-round':   '18_koltso-soliter_krug_beloe_zoloto_v2',   # гладкий солитер
         'pave-round':      '18_koltso-soliter_v_obsypke_krug_beloe_zoloto',
-        'soliter-fancy':   '08_ogranka_radiant_koltso',
-        'pave-fancy':      '22_koltso_soliter_v_obsypke_oval',
+        # Варианты с фантазийной огранкой сюда не входят: у них
+        # общий кадр item-fancy-forms со всеми формами (см. ниже).
         'doroshka':        '24_koltso-dorozhka_krugloe',
         'studs-round':     '29_sergi-pusety_krug_belye',
-        'studs-fancy':     '31_sergi-pusety_oval_belye',
         'studs-yellow':    '29_sergi-pusety_zheltye_podushka',
         'tennis-bracelet': '35_tennisny_braslet_2ct',
         'tennis-necklace': '38_tennisnye_kolye_tri_tsveta_zolota',
@@ -201,6 +200,18 @@ def main(src):
         n = save(img, 'item-%s.webp' % vid)
         total += n
         print('%-30s %-12s %6.0fКБ' % ('item-%s.webp' % vid, '%dx%d' % img.size, n / 1024))
+
+    # ── Фантазийная огранка: не одна форма, а класс форм ──
+    # Для таких вариантов показываем общий кадр со всеми 12 формами.
+    # Он широкий и с подписями, поэтому в квадрат его не загоняем —
+    # иначе текст под камнями станет нечитаемым.
+    f = os.path.join(src, '08_ogranka_vse_formy.png')
+    if os.path.exists(f):
+        n = save(photo(f, 1100), 'item-fancy-forms.webp')
+        total += n
+        print('%-30s %-12s %6.0fКБ' % ('item-fancy-forms.webp', 'широкий', n / 1024))
+    else:
+        print('НЕТ исходника: 08_ogranka_vse_formy')
 
     # ── Фото-референс размера по типу изделия ──
     SIZES = {
