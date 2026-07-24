@@ -172,6 +172,7 @@ def main(src):
     SIZES = {
         'size-ring':     ('17_proportsii_razmery_brilliantov_na_ruke', 900, 1.0),
         'size-studs':    ('28_proportsii_razmery_na_ushe', 900, 1.0),
+        'worn-doroshka':   ('25_koltsa-dorozhki_na_rukah', 900, 1.0),
         'worn-bracelet':   ('36_tennisnye_braslety_na_ruke', 900, 1.0),
         'worn-necklace':   ('39_tennisnoe_kolye_na_shee_v2', 900, 1.0),
         'worn-necklace-2': ('37_tennisnoe_kolye_na_shee', 900, 1.0),

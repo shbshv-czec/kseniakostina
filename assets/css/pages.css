@@ -294,6 +294,11 @@
   .cut-preview__photo { max-height:none }
 }
 
+/* Кнопка копирования на секунду становится подтверждением. Ширина
+   при этом меняется, поэтому строка кнопок не должна их растягивать —
+   иначе соседняя кнопка дёргается вместе с текстом. */
+#r-copy.is-done { color:var(--paraiba-2); border-color:var(--paraiba-2) }
+
 .result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
 .result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
 #r-mm-row[hidden] { display:none }

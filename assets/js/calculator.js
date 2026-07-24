@@ -19,14 +19,6 @@
   var TG = 'https://t.me/kseniadiamond';
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
-  // Границы бюджетных корзин каталога, чтобы перебросить туда с фильтром
-  var BUDGETS = [
-    [0, 5000, 'до 5 000'],
-    [5000, 10000, '5 000–10 000'],
-    [10000, 30000, '10 000–30 000'],
-    [30000, Infinity, 'от 30 000'],
-  ];
-
   var data, product, variant, grade, weight;
 
   function money(v) {
@@ -111,13 +103,14 @@
       vis.hidden = true;
     }
 
+    syncUrl();
+
     if (!span) {
       out.classList.add('is-out');
       $('#r-price').textContent = 'Посчитаю индивидуально';
       $('#r-price-note').textContent = 'Такой вес выходит за рамки классических ' +
         'позиций. Напишите мне — подберу камень под ваш запрос и назову точную стоимость.';
       $('#r-discuss').textContent = 'Написать Ксении';
-      $('#r-to-catalog').hidden = true;
       return;
     }
 
@@ -129,12 +122,79 @@
     // «Ориентировочная стоимость». Строка остаётся только там, где
     // цены нет вовсе и нужно объяснить почему.
     $('#r-price-note').textContent = '';
+  }
 
-    var mid = (lo + hi) / 2;
-    var band = BUDGETS.find(function (b) { return mid >= b[0] && mid < b[1]; });
-    var link = $('#r-to-catalog');
-    link.hidden = false;
-    link.href = '../catalog/?budget=' + encodeURIComponent(band[2]) + '&stock=1';
+  /* ---------- Ссылка на выбранное ---------- */
+  /* Весь выбор помещается в адрес, поэтому ссылка открывается в том же
+     состоянии и никакого бэкенда для этого не нужно. Адрес обновляется
+     через replaceState: каждое нажатие кнопки не должно превращаться
+     в отдельный шаг истории, иначе «назад» пришлось бы жать двадцать раз. */
+  function syncUrl() {
+    history.replaceState(null, '', location.pathname +
+      '?v=' + encodeURIComponent(variant.id) +
+      '&g=' + encodeURIComponent(grade) +
+      '&w=' + weight);
+  }
+
+  function findVariant(id) {
+    for (var i = 0; i < data.products.length; i++) {
+      var v = data.products[i].variants.filter(function (x) { return x.id === id; })[0];
+      if (v) return { product: data.products[i], variant: v };
+    }
+    return null;
+  }
+
+  function restoreFromUrl() {
+    // Каждое значение проверяем по данным: id исполнения может исчезнуть
+    // при следующем обновлении прайса, и тогда лучше открыть калькулятор
+    // как обычно, чем показать несуществующее сочетание.
+    var p = new URLSearchParams(location.search);
+    var found = p.get('v') && findVariant(p.get('v'));
+    if (!found) return false;
+    product = found.product;
+    variant = found.variant;
+
+    var g = p.get('g');
+    if (g === 'any' || variant.grades.indexOf(g) >= 0) grade = g;
+
+    var w = parseFloat(p.get('w'));
+    var ws = variant.rows.map(function (r) { return r[0]; });
+    if (w >= Math.min.apply(null, ws) && w <= Math.max.apply(null, ws)) weight = w;
+    return true;
+  }
+
+  var copyTimer;
+  function copyLink() {
+    var btn = $('#r-copy');
+    copy(location.href).then(function (ok) {
+      btn.textContent = ok ? '✓ Ссылка скопирована' : 'Не удалось скопировать';
+      btn.classList.toggle('is-done', ok);
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(function () {
+        btn.textContent = 'Скопировать ссылку';
+        btn.classList.remove('is-done');
+      }, 2600);
+    });
+  }
+
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+                                                      function () { return false; });
+    }
+    // Запасной путь для http и старых мобильных браузеров
+    return new Promise(function (res) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      ta.remove();
+      res(ok);
+    });
   }
 
   /* ---------- Элементы выбора ---------- */
@@ -199,6 +259,7 @@
     'item-tennis-bracelet':      [579, 560],
     'size-ring':                 [900, 981],
     'size-studs':                [900, 720],
+    'worn-doroshka':             [900, 1350],
     'worn-bracelet':             [900, 1350],
     'worn-necklace':             [900, 1550],
     'worn-necklace-2':           [900, 1351],
@@ -215,7 +276,10 @@
     'pave-round':           ['item-pave-round',           'size-ring'],
     'pave-fancy':           ['item-pave-fancy',           'size-ring'],
     'pave-fancy-yellow':    ['item-pave-fancy-yellow',    'size-ring'],
-    'doroshka':             ['item-doroshka',             'size-ring'],
+    // У дорожки вместо схемы каратности — кольца на руках: схема
+    // сравнивает размеры одиночных камней, а тут дорожка из мелких
+    // по всему кольцу, и сравнивать нечего.
+    'doroshka':             ['item-doroshka',             'worn-doroshka'],
     'studs-round':          ['item-studs-round',          'size-studs'],
     'studs-fancy':          ['item-studs-fancy',          null],
     'studs-yellow':         ['item-studs-yellow',         'size-studs'],
@@ -228,6 +292,7 @@
   var ALT = {
     'size-ring': 'Сравнение размеров бриллиантов на руке: от 0,5 до 3 карат',
     'size-studs': 'Сравнение размеров бриллиантов на ухе: от 0,5 до 3 карат',
+    'worn-doroshka': 'Кольца-дорожки на руках',
     'worn-bracelet': 'Теннисные браслеты на руке',
     'worn-necklace': 'Теннисное колье на шее',
     'worn-necklace-2': 'Теннисное колье на шее',
@@ -323,7 +388,7 @@
       var solo = $('#variant-solo');
       solo.hidden = false;
       solo.textContent = (CUT_PHRASE[variant.cut] || variant.name) +
-        ', ' + variant.name + '. Вес — ниже.';
+        ', ' + variant.name;
       return;
     }
     hideAxes();
@@ -440,7 +505,18 @@
     });
 
     $('#r-discuss').href = TG;
-    setProduct(json.products[0]);
+    $('#r-copy').addEventListener('click', copyLink);
+
+    // Если в адресе лежит сохранённый выбор — открываемся на нём.
+    // Кнопки изделий рисуем сами: setProduct сбросил бы исполнение
+    // на первое в списке и восстановление потеряло бы смысл.
+    if (restoreFromUrl()) {
+      afterVariant();
+      chips($('#f-product'), data.products, product.id, setProduct);
+      renderVariants();
+    } else {
+      setProduct(json.products[0]);
+    }
     $('#calc').hidden = false;
     $('#loading').hidden = true;
   }
