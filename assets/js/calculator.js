@@ -125,9 +125,10 @@
     $('#r-discuss').textContent = 'Обсудить заказ';
     var lo = toHundreds(span[0]), hi = toHundreds(span[1]);
     $('#r-price').textContent = lo === hi ? money(lo) : money(lo) + ' — ' + money(hi);
-    $('#r-price-note').textContent = lo === hi
-      ? 'Ориентировочно, за изделие целиком'
-      : 'Ориентировочная вилка за изделие целиком';
+    // Подписи под ценой нет: заголовок над ней уже говорит
+    // «Ориентировочная стоимость». Строка остаётся только там, где
+    // цены нет вовсе и нужно объяснить почему.
+    $('#r-price-note').textContent = '';
 
     var mid = (lo + hi) / 2;
     var band = BUDGETS.find(function (b) { return mid >= b[0] && mid < b[1]; });
