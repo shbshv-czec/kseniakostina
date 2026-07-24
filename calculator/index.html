@@ -116,32 +116,27 @@
           <p class="field__hint" id="grade-note"></p>
         </div>
 
-        <!-- Вес и схема размеров стоят в один ряд: у колец и пусет схема
-             подписана теми же каратами, что и точки под ползунком, и
-             читать их рядом естественнее. У браслета и колье схема
-             высокая — там она остаётся под фото изделия (слоты ниже,
-             элемент между ними переставляет скрипт). -->
-        <div class="weight-row">
-          <div class="field">
-            <label class="field__label" for="weight" id="weight-label">Вес камня</label>
-            <div class="range-val" id="weight-val">1 ct</div>
-            <input class="range" type="range" id="weight" min="1" max="3" step="0.05" value="1"
-                   aria-labelledby="weight-label" aria-describedby="weight-val">
-            <div class="range-ticks" id="range-ticks" role="group" aria-label="Веса из каталога"></div>
-          </div>
-          <div class="slot" id="weight-ref-slot"></div>
+        <div class="field">
+          <label class="field__label" for="weight" id="weight-label">Вес камня</label>
+          <div class="range-val" id="weight-val">1 ct</div>
+          <input class="range" type="range" id="weight" min="1" max="3" step="0.05" value="1"
+                 aria-labelledby="weight-label" aria-describedby="weight-val">
+          <div class="range-ticks" id="range-ticks" role="group" aria-label="Веса из каталога"></div>
         </div>
 
+        <!-- Под ползунком — два кадра в ряд: слева изделие, справа
+             каратность на человеке. Что именно в каждом, зависит от
+             исполнения и задано словарём PAIR в calculator.js: у браслета
+             и колье схемы каратности нет, там оба кадра на человеке, а у
+             пусет с фантазийной огранкой второго кадра нет вовсе. -->
         <div class="preview-row" id="preview-row">
           <div class="cut-preview">
-            <img id="cut-img" class="cut-preview__photo" width="560" height="560" alt="" loading="lazy" decoding="async">
+            <img id="pic-left" class="cut-preview__photo" width="720" height="346" alt="" loading="lazy" decoding="async">
           </div>
-          <div class="slot" id="preview-ref-slot"></div>
+          <div class="cut-preview" id="pic-right-wrap">
+            <img id="pic-right" class="cut-preview__photo" width="900" height="981" alt="" loading="lazy" decoding="async">
+          </div>
         </div>
-
-        <figure class="size-ref" id="size-ref-fig">
-          <img id="size-ref" class="size-ref__img" width="900" height="981" alt="" loading="lazy" decoding="async">
-        </figure>
 
         <!-- Кружок рисуется в натуральную величину: 1 мм ≈ 3,8 px.
              Справочная строка «0,5 карата — 5 мм» показывается только
@@ -198,21 +193,21 @@
       <p class="lead">При выборе бриллианта важно учитывать несколько ключевых характеристик, которые определяют его ценность и красоту.</p>
       <div class="edu-grid">
         <figure class="edu-card">
-          <img src="../assets/img/cuts/edu-carat.webp" width="700" height="804" alt="Сравнение веса бриллиантов на примере серёг-пусет" loading="lazy" decoding="async">
+          <img src="../assets/img/cuts/edu-carat.webp" width="900" height="855" alt="Сравнение веса бриллиантов на примере серёг-пусет" loading="lazy" decoding="async">
           <figcaption>
             <b class="edu-card__title">Carat, вес</b>
             Вес бриллианта измеряется в каратах, и каждый карат — это 0,2 грамма. Но помните, что размер камня — не главный показатель его великолепия.
           </figcaption>
         </figure>
         <figure class="edu-card">
-          <img src="../assets/img/cuts/edu-cut.webp" width="1100" height="863" alt="Двенадцать форм огранки бриллианта с названиями" loading="lazy" decoding="async">
+          <img src="../assets/img/cuts/edu-cut.webp" width="900" height="855" alt="Двенадцать форм огранки бриллианта с названиями" loading="lazy" decoding="async">
           <figcaption>
             <b class="edu-card__title">Cut, огранка</b>
             Правильная огранка делает бриллиант настоящим произведением искусства, позволяя свету проникать в камень и возвращаться обратно, создавая тот самый завораживающий блеск. Огранка — самая важная характеристика, поэтому я предлагаю бриллианты только с огранкой Excellent или Very Good.
           </figcaption>
         </figure>
         <figure class="edu-card">
-          <img src="../assets/img/cuts/edu-color.webp" width="900" height="1112" alt="Шкала цвета бриллиантов от D до Z" loading="lazy" decoding="async">
+          <img src="../assets/img/cuts/edu-color.webp" width="900" height="855" alt="Шкала цвета бриллиантов от D до Z" loading="lazy" decoding="async">
           <figcaption>
             <b class="edu-card__title">Color, цвет</b>
             Чем меньше цветового оттенка в бриллианте, тем выше его ценность. Идеальные бриллианты совершенно бесцветны и классифицируются буквами от D, абсолютно бесцветного, до Z с явными оттенками.

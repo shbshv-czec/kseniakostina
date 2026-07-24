@@ -268,40 +268,33 @@
 
 /* ── Предпросмотр огранки в калькуляторе ── */
 /* Фото изделия и схема каратности — в один ряд, равными долями. */
+/* По центру, а не по верхнему краю: кадр изделия — широкая полоса
+   в несколько раз ниже портрета рядом, и прижатый вверх он висел
+   в углу пустой половины ряда. */
 .preview-row {
-  display:flex; gap:clamp(12px,2vw,24px); align-items:flex-start;
+  display:flex; gap:clamp(12px,2vw,24px); align-items:center;
   margin:8px 0 4px;
 }
-/* Схему в ряд отдаёт слот с display:contents, поэтому она не попадает
-   под `> *` — перечисляем оба элемента ряда явно. */
-.preview-row > *, .preview-row .size-ref { flex:1 1 0; min-width:0; margin:0 }
-/* Фото изделия обрезано по самому изделию, лишнего поля в нём нет,
-   поэтому ограничивать ширину не нужно: узкая полоса из трёх колец
-   и во всю колонку остаётся невысокой. */
-.cut-preview__photo, .size-ref__img { display:block; border-radius:2px }
-.size-ref__img { width:100%; height:auto }
-/* Фото изделия — по ширине колонки, но не выше 400 px. Пропорции у
-   групповых кадров разные: полоса из трёх колец и во всю ширину
-   остаётся низкой, а почти квадратный кадр браслета без ограничения
-   занимал бы пол-экрана. */
-.cut-preview__photo { max-width:100%; max-height:400px; width:auto; height:auto }
-/* Слот показа: display:contents убирает лишний уровень, и картинка
-   становится прямым элементом ряда. Пустой слот не занимает места,
-   поэтому ряд не приходится переключать классами. */
-.slot { display:contents }
-
-/* ── Вес камня и схема размеров в один ряд ── */
-/* Схема подписана теми же каратами, что стоят точками под ползунком:
-   рядом они читаются как одна шкала. Ползунок при этом становится
-   короче — во всю колонку он обещал плавность, которой за пятью
-   табличными точками нет. */
-.weight-row { display:flex; gap:clamp(16px,2.5vw,32px); align-items:flex-start }
-.weight-row .field { flex:1 1 auto; min-width:0 }
-.weight-row .size-ref { flex:0 0 clamp(150px,26%,240px); margin:0 }
-@media (max-width:560px) {
-  .weight-row { flex-direction:column }
-  .weight-row .size-ref { flex:none; align-self:center; max-width:260px }
+.preview-row > * { flex:1 1 0; min-width:0; margin:0 }
+/* Кадры вписываются по ширине своей половины, но не выше 440 px:
+   у изделий пропорции разные — от полосы из трёх колец до портрета
+   на человеке, — и без потолка портрет растянул бы ряд на пол-экрана. */
+.cut-preview__photo {
+  display:block; border-radius:2px;
+  max-width:100%; max-height:440px; width:auto; height:auto;
 }
+/* Когда кадр один (пусеты фантазийной огранки), он занимает половину
+   ряда, как занимал бы в паре: во всю ширину такой снимок читается
+   как главное на странице, хотя это только иллюстрация. */
+.preview-row.is-solo > * { flex:0 1 50% }
+/* На телефоне в ряд оба кадра ужимаются примерно до 170 px, и подписи
+   каратов на схеме становятся нечитаемыми — там они идут друг под другом. */
+@media (max-width:560px) {
+  .preview-row { flex-direction:column; align-items:flex-start; gap:18px }
+  .preview-row > *, .preview-row.is-solo > * { flex:none; max-width:100% }
+  .cut-preview__photo { max-height:none }
+}
+
 .result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
 .result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
 #r-mm-row[hidden] { display:none }
@@ -314,11 +307,13 @@
 .edu .lead { max-width:60ch; margin-top:16px }
 .edu-grid {
   margin-top:clamp(32px,4vw,52px);
-  /* По две в ряд: в четырёх колонках подписи форм огранки и буквы
-     шкалы цвета становятся нечитаемыми. */
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));
+  /* Строго две в ряд, то есть 2×2: в четырёх колонках подписи форм
+     огранки и буквы шкалы цвета становятся нечитаемыми, а «сколько
+     влезет» давало то три, то две — сетка выглядела случайной. */
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
   gap:clamp(24px,3vw,44px);
 }
+@media (max-width:720px) { .edu-grid { grid-template-columns:1fr } }
 .edu-card { margin:0 }
 .edu-card img {
   width:100%; height:auto; display:block; background:var(--bg-white);

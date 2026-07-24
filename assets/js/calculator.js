@@ -184,35 +184,68 @@
     p.hidden = !note;
   }
 
-  // Размеры кадров изделий. Пропорции у групповых кадров разные — от
-  // почти квадрата до полосы 5:1, — поэтому размер проставляется в
-  // атрибуты, иначе при переключении исполнения вёрстка скачет, пока
-  // грузится файл. Числа печатает tools/prepare_images.py.
-  var ITEM_BOX = {
-    'soliter-round':   [720, 346],
-    'pave-round':      [720, 364],
-    'soliter-fancy':   [720, 175],
-    'pave-fancy':      [720, 166],
-    'soliter-fancy-yellow': [720, 205],
-    'pave-fancy-yellow':    [720, 207],
-    'doroshka':        [641, 560],
-    'studs-round':     [720, 134],
-    'studs-fancy':     [583, 560],
-    'studs-yellow':    [720, 180],
-    'tennis-bracelet': [579, 560],
-    'tennis-necklace': [539, 560],
+  // Размеры всех кадров. Пропорции разные — от полосы 5:1 до портрета,
+  // поэтому размер проставляется в атрибуты, иначе при переключении
+  // исполнения вёрстка скачет, пока грузится файл. Числа печатает
+  // tools/prepare_images.py, менять их надо вместе.
+  var IMG = {
+    'item-soliter-round':        [720, 346],
+    'item-pave-round':           [720, 364],
+    'item-soliter-fancy':        [720, 175],
+    'item-pave-fancy':           [720, 166],
+    'item-soliter-fancy-yellow': [720, 205],
+    'item-pave-fancy-yellow':    [720, 207],
+    'item-doroshka':             [641, 560],
+    'item-studs-round':          [720, 134],
+    'item-studs-fancy':          [583, 560],
+    'item-studs-yellow':         [720, 180],
+    'item-tennis-bracelet':      [579, 560],
+    'size-ring':                 [900, 981],
+    'size-studs':                [900, 720],
+    'worn-bracelet':             [900, 1350],
+    'worn-necklace':             [900, 1550],
+    'worn-necklace-2':           [900, 1351],
   };
 
-  // Схема размеров: собственные размеры кадров и место показа.
-  // Рядом с ползунком стоят те изделия, у которых на схеме подписаны
-  // караты, — она читается как продолжение шкалы веса.
-  var SIZE_REF = {
-    ring:     [900, 981],
-    studs:    [900, 720],
-    bracelet: [900, 1234],
-    necklace: [900, 1550],
+  // Пара кадров под ползунком: слева и справа. Второго может не быть.
+  // У браслета и колье схемы каратности нет: у браслета справа стоит
+  // групповой кадр с подписанными каратами, у колье оба кадра — на
+  // человеке, потому что размер камня там ни о чём не говорит.
+  var PAIR = {
+    'soliter-round':        ['item-soliter-round',        'size-ring'],
+    'soliter-fancy':        ['item-soliter-fancy',        'size-ring'],
+    'soliter-fancy-yellow': ['item-soliter-fancy-yellow', 'size-ring'],
+    'pave-round':           ['item-pave-round',           'size-ring'],
+    'pave-fancy':           ['item-pave-fancy',           'size-ring'],
+    'pave-fancy-yellow':    ['item-pave-fancy-yellow',    'size-ring'],
+    'doroshka':             ['item-doroshka',             'size-ring'],
+    'studs-round':          ['item-studs-round',          'size-studs'],
+    'studs-fancy':          ['item-studs-fancy',          null],
+    'studs-yellow':         ['item-studs-yellow',         'size-studs'],
+    'tennis-bracelet':      ['worn-bracelet',             'item-tennis-bracelet'],
+    'tennis-necklace':      ['worn-necklace',             'worn-necklace-2'],
   };
-  var BESIDE_SLIDER = { ring: true, studs: true, bracelet: true };
+
+  // Подпись к кадру для тех, кто не видит картинок. У кадров изделия
+  // она собирается из названия исполнения, поэтому здесь только общие.
+  var ALT = {
+    'size-ring': 'Сравнение размеров бриллиантов на руке: от 0,5 до 3 карат',
+    'size-studs': 'Сравнение размеров бриллиантов на ухе: от 0,5 до 3 карат',
+    'worn-bracelet': 'Теннисные браслеты на руке',
+    'worn-necklace': 'Теннисное колье на шее',
+    'worn-necklace-2': 'Теннисное колье на шее',
+    'item-tennis-bracelet': 'Теннисные браслеты разной каратности: 2, 3 и 5,7 карата',
+  };
+
+  function setPhoto(el, name) {
+    // Кадра может не быть — тогда прячем и не грузим ничего лишнего.
+    el.parentNode.hidden = !name;
+    if (!name) return;
+    el.src = '../assets/img/cuts/' + name + '.webp';
+    var box = IMG[name];
+    if (box) { el.width = box[0]; el.height = box[1]; }
+    el.alt = ALT[name] || (product.name + ', ' + variant.name);
+  }
 
   // Подпись под кружком в натуральную величину. Есть только там, где
   // кадр показывает камень на человеке.
@@ -375,27 +408,12 @@
     updateWeightLabel();
     markTicks();
 
-    // Фото — конкретного изделия под выбранное исполнение (item-<id>),
-    // а не обобщённое по огранке: иначе у серёг показывалось кольцо.
-    var img = $('#cut-img');
-    img.src = '../assets/img/cuts/item-' + variant.id + '.webp';
-    img.alt = product.name + ', ' + variant.name;
-    var ib = ITEM_BOX[variant.id];
-    if (ib) { img.width = ib[0]; img.height = ib[1]; }
-
-    // Фото-референс размера — по типу изделия (рука / ухо / запястье / шея).
-    var ref = $('#size-ref');
-    ref.src = '../assets/img/cuts/size-' + product.id + '.webp';
-    ref.alt = 'Наглядное сравнение размеров бриллиантов: ' + product.name.toLowerCase();
-    // Размеры кадров разные, поэтому проставляем их в атрибуты: иначе при
-    // переключении изделия вёрстка скачет, пока грузится картинка.
-    var box = SIZE_REF[product.id];
-    if (box) { ref.width = box[0]; ref.height = box[1]; }
-    // У колец, пусет и браслета схема подписана теми же каратами, что стоят
-    // под ползунком, — её место рядом со шкалой. У колье такой шкалы на
-    // кадре нет, он просто показывает изделие на шее, и остаётся под фото.
-    var slot = $(BESIDE_SLIDER[product.id] ? '#weight-ref-slot' : '#preview-ref-slot');
-    if ($('#size-ref-fig').parentNode !== slot) slot.appendChild($('#size-ref-fig'));
+    // Пара кадров под ползунком. Когда правого нет, левый занимает
+    // половину ряда, а не растягивается во всю ширину.
+    var pair = PAIR[variant.id] || [];
+    setPhoto($('#pic-left'), pair[0]);
+    setPhoto($('#pic-right'), pair[1]);
+    $('#preview-row').classList.toggle('is-solo', !pair[1]);
     render();
   }
 

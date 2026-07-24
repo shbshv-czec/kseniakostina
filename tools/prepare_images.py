@@ -98,6 +98,24 @@ def photo(path, width, keep=1.0):
 
 
 
+def pad_to_box(im, box):
+    """Вписывает кадр целиком в box и добирает поле цветом его же фона.
+    Цвет берётся по медиане рамки в 12 px — по углам врут кадры, у которых
+    рисунок подходит вплотную к краю."""
+    w, h = box
+    edge = np.concatenate([
+        np.asarray(im)[:12].reshape(-1, 3), np.asarray(im)[-12:].reshape(-1, 3),
+        np.asarray(im)[:, :12].reshape(-1, 3), np.asarray(im)[:, -12:].reshape(-1, 3),
+    ])
+    bg = tuple(int(c) for c in np.median(edge, axis=0))
+
+    t = im.copy()
+    t.thumbnail(box, Image.LANCZOS)
+    out = Image.new('RGB', box, bg)
+    out.paste(t, ((w - t.width) // 2, (h - t.height) // 2))
+    return out
+
+
 def save(img, name, quality=84, lossless=False):
     p = os.path.join(OUT, name)
     kw = dict(lossless=True, method=6) if lossless else dict(quality=quality, method=6)
@@ -133,7 +151,8 @@ def main(src):
         'studs-fancy':     '31_sergi-pusety_fantazi_gruppa',
         'studs-yellow':    '29_sergi-pusety_zheltye_gruppa',
         'tennis-bracelet': '35_tennisny_braslet_gruppa',
-        'tennis-necklace': '38_tennisnoe_kolye_gruppa',
+        # У колье изделие показывают два кадра на человеке (worn-necklace),
+        # групповой снимок под него не нужен.
     }
     # Размеры печатаем: их же надо проставить в ITEM_BOX калькулятора,
     # иначе при переключении исполнения вёрстка скачет, пока грузится файл.
@@ -146,15 +165,16 @@ def main(src):
         total += n
         print('%-30s %-12s %6.0fКБ' % ('item-%s.webp' % vid, '%dx%d' % img.size, n / 1024))
 
-    # ── Фото-референс размера по типу изделия ──
-    # Третье число — доля кадра по высоте, которую оставляем. У браслетов
-    # нижняя четверть исходника — пустой тёмный фон: рядом с ползунком
-    # она только растягивает ряд. Остальные кадры берём целиком.
+    # ── Схема каратности: сколько камень занимает на человеке ──
+    # Третье число — доля кадра по высоте, которую оставляем.
+    # У браслета и колье такой схемы нет: там рядом с изделием стоит
+    # второй кадр на человеке (WORN ниже).
     SIZES = {
         'size-ring':     ('17_proportsii_razmery_brilliantov_na_ruke', 900, 1.0),
         'size-studs':    ('28_proportsii_razmery_na_ushe', 900, 1.0),
-        'size-bracelet': ('34_proportsii_braslety_karatnost', 900, 0.78),
-        'size-necklace': ('39_tennisnoe_kolye_na_shee_v2', 900, 1.0),
+        'worn-bracelet':   ('36_tennisnye_braslety_na_ruke', 900, 1.0),
+        'worn-necklace':   ('39_tennisnoe_kolye_na_shee_v2', 900, 1.0),
+        'worn-necklace-2': ('37_tennisnoe_kolye_na_shee', 900, 1.0),
     }
     for out_name, (name, width, keep) in SIZES.items():
         f = os.path.join(src, name + '.png')
@@ -166,21 +186,25 @@ def main(src):
         print('%-30s %-12s %6.0fКБ' % (out_name + '.webp', '%dx%d' % img.size, n / 1024))
 
     # ── Четыре характеристики камня (4C) ──
-    # Ровно четыре карточки: вес, огранка, цвет, чистота.
+    # Ровно четыре карточки: вес, огранка, цвет, чистота. Все четыре
+    # приводятся к одному размеру EDU_BOX — в сетке 2×2 снимки разной
+    # высоты выглядят как вёрстка, которая поехала. Обрезать нельзя:
+    # на каждом кадре шкала, и срезанный край — это потерянные градации.
+    # Поэтому кадр вписывается целиком, а поле добирается цветом его же
+    # фона (у сравнения веса он серый, у остальных белый) — стыка не видно.
+    EDU_BOX = (900, 855)
     EDU = {
-        'edu-carat':   ('07_sravnenie_vesa_brilliantov_sergi-pusety', 700),
-        'edu-cut':     ('08_ogranka_vse_formy', 1100),
-        'edu-color':   ('09_tsvet_shkala_polnaya', 900),
-        'edu-clarity': ('12_chistota_shkala_vklyucheniya', 900),
+        'edu-carat':   '07_sravnenie_vesa_brilliantov_sergi-pusety',
+        'edu-cut':     '08_ogranka_vse_formy',
+        'edu-color':   '09_tsvet_shkala_polnaya',
+        'edu-clarity': '12_chistota_shkala_vklyucheniya',
     }
-    for out_name, (name, width) in EDU.items():
+    for out_name, name in EDU.items():
         f = os.path.join(src, name + '.png')
         if not os.path.exists(f):
             print('НЕТ исходника:', name); continue
-        img = photo(f, width)
+        img = pad_to_box(Image.open(f).convert('RGB'), EDU_BOX)
         n = save(img, out_name + '.webp')
-        # Размер печатаем, чтобы его же проставить в width/height разметки —
-        # иначе вёрстка скачет при загрузке.
         total += n
         print('%-30s %-12s %6.0fКБ' % (out_name + '.webp', '%dx%d' % img.size, n / 1024))
 
