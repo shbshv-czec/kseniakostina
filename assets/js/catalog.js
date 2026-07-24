@@ -118,7 +118,7 @@
   /* ---------- Отрисовка ---------- */
   function renderCount() {
     var n = view.length;
-    var s = view.filter(function (i) { return i.in_stock && !i.sold; }).length;
+    var s = view.filter(function (i) { return i.in_stock; }).length;
     $('#count').innerHTML = '<b>' + n + '</b> ' +
       plural(n, 'позиция', 'позиции', 'позиций') +
       (n ? ' · ' + s + ' в наличии' : '');
@@ -126,7 +126,7 @@
 
   function card(item) {
     var li = document.createElement('li');
-    li.className = 'card' + (item.sold ? ' card--sold' : '');
+    li.className = 'card';
 
     var name = item.stone || 'Камень';
     if (item.cut) name += ', ' + item.cut.toLowerCase();
@@ -151,10 +151,12 @@
       ph.firstChild.textContent = item.stone || '—';
       media.appendChild(ph);
     }
-    if (item.sold) media.insertAdjacentHTML('beforeend',
-      '<span class="card__badge card__badge--sold">Продано</span>');
-    else if (item.in_stock) media.insertAdjacentHTML('beforeend',
-      '<span class="card__badge card__badge--stock">В наличии</span>');
+    // Плашка есть у каждой карточки. Канал делит посты ровно надвое:
+    // «📦 В наличии» и «На заказ», — и без второй плашки половина каталога
+    // выглядела просто карточкой без пометки, будто данных не хватило.
+    media.insertAdjacentHTML('beforeend', item.in_stock
+      ? '<span class="card__badge card__badge--stock">В наличии</span>'
+      : '<span class="card__badge card__badge--order">На заказ</span>');
     li.appendChild(media);
 
     var spec = [];

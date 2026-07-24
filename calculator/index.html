@@ -89,14 +89,22 @@
           <p class="field__solo" id="variant-solo" hidden></p>
         </div>
 
-        <!-- Огранка — вторая ось выбора, но только у колец: в прайсе
-             солитер и обсыпка есть и в круглой, и в фантазийной. У пусет
-             такой пары нет, там исполнение остаётся одним рядом. -->
+        <!-- Огранка и цвет камня — вторая и третья оси выбора, но только
+             у колец: в прайсе солитер и обсыпка есть и в круглой, и в
+             фантазийной, а фантазийная — и в белом, и в жёлтом. Ряд
+             появляется, только когда на этой оси есть из чего выбирать:
+             у дорожки одна огранка, у круглых — один цвет. У пусет второй
+             оси в данных нет, там исполнение остаётся одним рядом. -->
         <div class="field" id="cut-field" hidden>
           <span class="field__label" id="l-cut">Огранка</span>
           <div class="field__row" id="f-cut" role="group" aria-labelledby="l-cut" aria-describedby="cut-note"></div>
           <p class="field__hint" id="cut-note" hidden></p>
           <p class="field__hint" id="side-note" hidden>Стоимость боковых камней считается отдельно и зависит от их размера.</p>
+        </div>
+
+        <div class="field" id="color-field" hidden>
+          <span class="field__label" id="l-color">Цвет камня</span>
+          <div class="field__row" id="f-color" role="group" aria-labelledby="l-color"></div>
         </div>
 
         <!-- Расшифровка характеристик — одной строкой под рядом кнопок,

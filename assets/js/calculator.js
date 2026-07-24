@@ -170,6 +170,8 @@
     'any': 'Показывает вилку между обоими вариантами',
     'F/VS1': 'Бесцветный, с очень мелкими включениями',
     'I/VS2': 'Почти бесцветный, с очень мелкими включениями',
+    'Y-Z': 'Некоторые камни в цвете Y-Z имеют очень красивый жёлтый оттенок ' +
+      'и могут быть разумной альтернативой фантазийным',
     'Y-Z/VS2': 'Некоторые камни в цвете Y-Z имеют очень красивый жёлтый оттенок ' +
       'и могут быть разумной альтернативой фантазийным',
     'Fancy Yellow': 'Насыщенный жёлтый, фантазийная категория цвета',
@@ -191,6 +193,8 @@
     'pave-round':      [720, 364],
     'soliter-fancy':   [720, 175],
     'pave-fancy':      [720, 166],
+    'soliter-fancy-yellow': [720, 205],
+    'pave-fancy-yellow':    [720, 207],
     'doroshka':        [641, 560],
     'studs-round':     [720, 134],
     'studs-fancy':     [583, 560],
@@ -238,64 +242,87 @@
     renderVariants();
   }
 
+  // Оси выбора, сверху вниз. Ряд показывается, только когда на этой оси
+  // при уже сделанном выборе есть из чего выбирать: у кольца-дорожки
+  // одна огранка, у круглых бриллиантов один цвет.
+  var AXES = [
+    { key: 'family',     field: '#variant-field', row: '#f-variant' },
+    { key: 'cut_name',   field: '#cut-field',     row: '#f-cut' },
+    { key: 'color_name', field: '#color-field',   row: '#f-color' },
+  ];
+
+  function matches(v, fixed) {
+    return Object.keys(fixed).every(function (k) { return v[k] === fixed[k]; });
+  }
+
+  function pickAxis(i, value) {
+    // Оси выше выбранной остаются как есть, сама ось меняется. Из
+    // подходящих вариантов берём тот, что сохраняет больше прежних
+    // значений на осях ниже: переключение «солитер → в обсыпке» не
+    // должно молча возвращать круглую, если смотрели жёлтую фантазийную.
+    var fixed = {};
+    for (var j = 0; j < i; j++) fixed[AXES[j].key] = variant[AXES[j].key];
+    fixed[AXES[i].key] = value;
+
+    var best = null, bestScore = -1;
+    product.variants.filter(function (v) { return matches(v, fixed); })
+      .forEach(function (v) {
+        var s = 0;
+        for (var j = i + 1; j < AXES.length; j++) {
+          if (v[AXES[j].key] === variant[AXES[j].key]) s++;
+        }
+        if (s > bestScore) { bestScore = s; best = v; }
+      });
+    if (best) pick(best.id);
+  }
+
+  function hideAxes() {
+    AXES.forEach(function (a) { $(a.field).hidden = true; });
+  }
+
   function renderVariants() {
     // Когда исполнение одно (браслет, колье), выбирать нечего — кнопку
     // прячем, а её содержание показываем строкой, чтобы не создавать
     // ощущение обрезанного выбора. Разные веса при этом остаются
     // за ползунком ниже.
     if (product.variants.length < 2) {
+      hideAxes();
+      $('#variant-field').hidden = false;
       $('#l-variant').hidden = true;
       $('#f-variant').hidden = true;
-      $('#cut-field').hidden = true;
       var solo = $('#variant-solo');
       solo.hidden = false;
       solo.textContent = (CUT_PHRASE[variant.cut] || variant.name) +
         ', ' + variant.name + '. Вес — ниже.';
       return;
     }
+    hideAxes();
+    $('#variant-field').hidden = false;
     $('#l-variant').hidden = false;
     $('#f-variant').hidden = false;
     $('#variant-solo').hidden = true;
 
-    // Кольца выбираются по двум осям: подтип и огранка. Разложить так
-    // получается только там, где в прайсе есть обе пары; у пусет
-    // «жёлтые бриллианты» — не огранка, и второй оси не выходит.
-    var byAxes = product.variants.every(function (v) { return v.family; });
-    if (!byAxes) {
-      $('#cut-field').hidden = true;
+    // Разложить выбор по осям получается только там, где они проставлены
+    // у всех вариантов. У пусет «жёлтые бриллианты» — не огранка, осей
+    // из этого не выходит, и остаётся один ряд с названиями.
+    if (!product.variants.every(function (v) { return v.family; })) {
       chips($('#f-variant'),
         product.variants.map(function (v) { return { id: v.id, name: v.name }; }),
         variant.id, function (it) { pick(it.id); });
       return;
     }
 
-    var families = uniq(product.variants.map(function (v) { return v.family; }));
-    chips($('#f-variant'),
-      families.map(function (f) { return { id: f, name: f }; }),
-      variant.family,
-      function (it) {
-        // При смене подтипа стараемся сохранить выбранную огранку:
-        // переключение «солитер → в обсыпке» не должно молча
-        // возвращать круглую, если человек смотрел фантазийную.
-        var inFamily = product.variants.filter(function (v) { return v.family === it.id; });
-        var same = inFamily.filter(function (v) { return v.cut_name === variant.cut_name; });
-        pick((same[0] || inFamily[0]).id);
-      });
+    var fixed = {};
+    AXES.forEach(function (a, i) {
+      var opts = uniq(product.variants.filter(function (v) { return matches(v, fixed); })
+        .map(function (v) { return v[a.key]; }));
+      fixed[a.key] = variant[a.key];
+      $(a.field).hidden = opts.length < 2;
+      if (opts.length < 2) return;
+      chips($(a.row), opts.map(function (o) { return { id: o, name: o }; }),
+        variant[a.key], function (it) { pickAxis(i, it.id); });
+    });
 
-    var cuts = product.variants
-      .filter(function (v) { return v.family === variant.family; })
-      .map(function (v) { return v.cut_name; });
-    $('#cut-field').hidden = cuts.length < 2;
-    if (cuts.length >= 2) {
-      chips($('#f-cut'),
-        uniq(cuts).map(function (c) { return { id: c, name: c }; }),
-        variant.cut_name,
-        function (it) {
-          pick(product.variants.filter(function (v) {
-            return v.family === variant.family && v.cut_name === it.id;
-          })[0].id);
-        });
-    }
     var fancy = variant.cut_name === 'Фантазийная';
     $('#cut-note').textContent = FANCY_SHAPES;
     $('#cut-note').hidden = !fancy;

@@ -126,6 +126,8 @@ def main(src):
         'pave-round':      '18_koltso-soliter_v_obsypke_krug_gruppa',
         'soliter-fancy':   '22_koltso-soliter_fantazi_gruppa',
         'pave-fancy':      '22_koltso-soliter_v_obsypke_fantazi_gruppa',
+        'soliter-fancy-yellow': '20_koltso-soliter_fantazi_zhelty_gruppa',
+        'pave-fancy-yellow':    '20_koltso-soliter_v_obsypke_fantazi_zhelty_gruppa',
         'doroshka':        '24_koltso-dorozhka_gruppa',
         'studs-round':     '29_sergi-pusety_krug_gruppa',
         'studs-fancy':     '31_sergi-pusety_fantazi_gruppa',
