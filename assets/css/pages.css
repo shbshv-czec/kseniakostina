@@ -294,10 +294,20 @@
   .cut-preview__photo { max-height:none }
 }
 
-/* Кнопка копирования на секунду становится подтверждением. Ширина
-   при этом меняется, поэтому строка кнопок не должна их растягивать —
-   иначе соседняя кнопка дёргается вместе с текстом. */
-#r-copy.is-done { color:var(--paraiba-2); border-color:var(--paraiba-2) }
+/* Копирование ссылки — действие, а не переход, поэтому по разметке это
+   кнопка (её видит скринридер, она работает с клавиатуры). Но выглядит
+   ссылкой: второй крупной кнопкой она спорила бы за внимание с
+   «Обсудить заказ», а это не равные по важности действия.
+   На секунду становится подтверждением — тогда подчёркивание убираем,
+   чтобы галочку не читали как ещё одну ссылку. */
+.linkbtn {
+  align-self:center;
+  font:inherit; font-size:15px; font-weight:500; padding:6px 4px;
+  border:0; background:none; color:var(--paraiba-2); cursor:pointer;
+  text-decoration:underline; text-underline-offset:3px;
+}
+.linkbtn:hover { text-decoration-thickness:2px }
+.linkbtn.is-done { color:var(--fg-2); text-decoration:none; cursor:default }
 
 .result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
 .result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
