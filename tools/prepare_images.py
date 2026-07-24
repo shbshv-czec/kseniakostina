@@ -161,6 +161,26 @@ def photo(path, width):
     return im
 
 
+def stack(paths, width):
+    """
+    Склеивает части одной шкалы в столбик.
+
+    Шкала цвета в каталоге разрезана на пять кусков (бесцветные,
+    почти бесцветные, слабый оттенок, очень слабый, лёгкий цвет).
+    В карточке нужна одна картинка, поэтому собираем их в порядке
+    шкалы GIA — от D к Z.
+    """
+    ims = [Image.open(p).convert('RGB') for p in paths]
+    ims = [im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+           for im in ims]
+    out = Image.new('RGB', (width, sum(im.height for im in ims)), (0, 0, 0))
+    y = 0
+    for im in ims:
+        out.paste(im, (0, y))
+        y += im.height
+    return out
+
+
 def save(img, name, quality=84, lossless=False):
     p = os.path.join(OUT, name)
     kw = dict(lossless=True, method=6) if lossless else dict(quality=quality, method=6)
@@ -228,12 +248,12 @@ def main(src):
         total += n
         print('%-30s %6.0fКБ' % (out_name + '.webp', n / 1024))
 
-    # ── Образовательные шкалы 4C ──
+    # ── Четыре характеристики камня (4C) ──
+    # Ровно четыре карточки: вес, огранка, цвет, чистота.
     EDU = {
-        'edu-gia':   ('13_sertifikat_gia', 900),
-        'edu-clarity': ('12_chistota_shkala_vklyucheniya', 1100),
-        'edu-color': ('11_tsvetnye_brillianty_fancy_yellow_ottenki', 800),
-        'edu-fluor': ('14_fluorestsentsiya_gradatsii', 900),
+        'edu-carat':   ('07_sravnenie_vesa_brilliantov_sergi-pusety', 700),
+        'edu-cut':     ('08_ogranka_vse_formy', 1100),
+        'edu-clarity': ('12_chistota_shkala_vklyucheniya', 900),
     }
     for out_name, (name, width) in EDU.items():
         f = os.path.join(src, name + '.png')
@@ -242,6 +262,19 @@ def main(src):
         n = save(photo(f, width), out_name + '.webp')
         total += n
         print('%-30s %6.0fКБ' % (out_name + '.webp', n / 1024))
+
+    # Цвет — пять кусков шкалы, склеиваем в порядке от D к Z
+    COLOR = ['09_tsvet_bestsvetnye_DEF', '09_tsvet_pochti_bestsvetnye_GHIJ',
+             '09_tsvet_slaby_ottenok_KLM', '09_tsvet_ochen_slaby_ottenok_NOPQR',
+             '09_tsvet_legky_tsvet_N-Z']
+    parts = [os.path.join(src, c + '.png') for c in COLOR]
+    missing = [c for c, p in zip(COLOR, parts) if not os.path.exists(p)]
+    if missing:
+        print('НЕТ исходников шкалы цвета:', missing)
+    else:
+        n = save(stack(parts, 885), 'edu-color.webp')
+        total += n
+        print('%-30s %6.0fКБ (склейка из %d частей)' % ('edu-color.webp', n / 1024, len(parts)))
 
     print('\nвсего: %.0f КБ в %d файлах' % (total / 1024, len(os.listdir(OUT))))
 

@@ -262,15 +262,18 @@
 .edu .lead { max-width:60ch; margin-top:16px }
 .edu-grid {
   margin-top:clamp(32px,4vw,52px);
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
-  gap:clamp(20px,2.5vw,32px);
+  /* По две в ряд: в четырёх колонках подписи форм огранки и буквы
+     шкалы цвета становятся нечитаемыми. */
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));
+  gap:clamp(24px,3vw,44px);
 }
 .edu-card { margin:0 }
 .edu-card img {
   width:100%; height:auto; display:block; background:var(--bg-white);
   border:1px solid rgba(42,39,36,0.08); border-radius:2px;
 }
-.edu-card figcaption { font-size:14px; line-height:1.5; color:var(--fg-2); margin-top:12px }
+.edu-card figcaption { font-size:14px; line-height:1.5; color:var(--fg-2); margin-top:14px }
+.edu-card figcaption b { color:var(--fg-1); font-weight:600 }
 
 /* ── Качество камня: кнопка с расшифровкой под ней ── */
 .grade-opt { display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:210px }

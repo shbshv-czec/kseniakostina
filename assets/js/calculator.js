@@ -305,14 +305,6 @@
     data = json;
     $('#disclaimer').textContent = json.note;
 
-    var terms = $('#terms-grid');
-    json.terms.forEach(function (t) {
-      var d = document.createElement('div');
-      var h = document.createElement('h3'); h.textContent = t[0];
-      var p = document.createElement('p'); p.textContent = t[1];
-      d.appendChild(h); d.appendChild(p); terms.appendChild(d);
-    });
-
     $('#weight').addEventListener('input', function (e) {
       weight = parseFloat(e.target.value);
       updateWeightLabel();
