@@ -152,6 +152,44 @@
     renderVariants();
   }
 
+  // Мелкая подпись под кнопкой качества — расшифровка обозначения.
+  // Для качеств, которых здесь нет (жёлтые бриллианты), подписи не
+  // придумываем: показываем только само обозначение.
+  var GRADE_NOTE = {
+    'any': 'Показывает вилку между обоими вариантами качества',
+    'F/VS1': 'Видимые дефекты отсутствуют',
+    'I/VS2': 'С видимыми включениями',
+  };
+
+  function gradeChips(host, items, onPick) {
+    host.innerHTML = '';
+    items.forEach(function (it) {
+      var wrap = document.createElement('div');
+      wrap.className = 'grade-opt';
+
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = it.name;
+      b.setAttribute('aria-pressed', String(it.id === grade));
+      b.addEventListener('click', function () { onPick(it); });
+      wrap.appendChild(b);
+
+      var note = GRADE_NOTE[it.id];
+      if (note) {
+        var p = document.createElement('p');
+        p.className = 'grade-opt__note';
+        p.textContent = note;
+        // Подпись читается вместе с кнопкой, а не отдельным текстом
+        var id = 'grade-note-' + it.id.replace(/[^\wа-яё]+/gi, '-');
+        p.id = id;
+        b.setAttribute('aria-describedby', id);
+        wrap.appendChild(p);
+      }
+      host.appendChild(wrap);
+    });
+  }
+
   // Фраза огранки для изделий с единственным исполнением
   var CUT_PHRASE = {
     krug: 'Круглые бриллианты', oval: 'Фантазийная огранка',
@@ -195,7 +233,7 @@
     var host = $('#f-grade');
     $('#grade-field').hidden = variant.grades.length < 2;
     if (variant.grades.length >= 2) {
-      chips(host, opts, grade, function (it) { grade = it.id; afterVariant(); render(); });
+      gradeChips(host, opts, function (it) { grade = it.id; afterVariant(); render(); });
     }
 
     var ws = variant.rows.map(function (r) { return r[0]; });
@@ -241,7 +279,7 @@
     img.alt = wide
       ? 'Формы фантазийной огранки: подушка, радиант, принцесса, ашер, круг, сердце, триллиант, овал, груша, эмеральд, маркиз, багет'
       : product.name + ', ' + variant.name;
-    img.classList.toggle('cut-preview__photo--wide', wide);
+    $('#preview-row').classList.toggle('is-wide', wide);
     // Фото-референс размера — по типу изделия (рука / ухо / запястье / шея).
     var ref = $('#size-ref');
     ref.src = '../assets/img/cuts/size-' + product.id + '.webp';

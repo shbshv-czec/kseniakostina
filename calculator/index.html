@@ -91,7 +91,6 @@
         <div class="field" id="grade-field">
           <span class="field__label" id="l-grade">Качество камня</span>
           <div class="field__row" id="f-grade" role="group" aria-labelledby="l-grade"></div>
-          <p class="field__hint">«Любое» показывает вилку между обоими вариантами качества.</p>
         </div>
 
         <div class="field">
@@ -102,19 +101,22 @@
           <div class="range-ticks" id="range-ticks" role="group" aria-label="Веса из каталога"></div>
         </div>
 
-        <div class="cut-preview">
-          <img id="cut-img" class="cut-preview__photo" width="560" height="560" alt="" loading="lazy" decoding="async">
+        <!-- Фото изделия и схема каратности стоят рядом, а не друг под
+             другом. Исключение — общий кадр всех форм огранки: он широкий,
+             и тогда ряд разворачивается в колонку (класс is-wide). -->
+        <div class="preview-row" id="preview-row">
+          <div class="cut-preview">
+            <img id="cut-img" class="cut-preview__photo" width="560" height="560" alt="" loading="lazy" decoding="async">
+          </div>
+          <figure class="size-ref">
+            <img id="size-ref" class="size-ref__img" width="900" height="981" alt="" loading="lazy" decoding="async">
+          </figure>
         </div>
 
         <div class="size-vis" id="size-vis" hidden>
           <div class="size-vis__stone" id="size-stone"></div>
           <p class="size-vis__cap" id="size-cap"></p>
         </div>
-
-        <figure class="size-ref">
-          <img id="size-ref" class="size-ref__img" width="900" height="600" alt="" loading="lazy" decoding="async">
-          <figcaption class="field__hint">Как разные караты выглядят на теле. Иллюстрация из печатного каталога — веса на фото могут не совпадать с выбранным.</figcaption>
-        </figure>
       </div>
 
       <aside class="result" id="result" aria-live="polite">

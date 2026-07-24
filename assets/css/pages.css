@@ -237,19 +237,25 @@
 }
 
 /* ── Предпросмотр огранки в калькуляторе ── */
-.cut-preview { margin:8px 0 4px }
-.cut-preview__photo { width:100%; max-width:460px; height:auto; display:block; border-radius:2px }
-/* Общий кадр со всеми формами огранки — широкий и с подписями,
-   поэтому занимает всю колонку, иначе текст не прочесть. */
-.cut-preview__photo--wide { max-width:100% }
+/* Фото изделия и схема каратности — в один ряд, равными долями. */
+.preview-row {
+  display:flex; gap:clamp(12px,2vw,24px); align-items:flex-start;
+  margin:8px 0 4px;
+}
+.preview-row > * { flex:1 1 0; min-width:0; margin:0 }
+.cut-preview__photo, .size-ref__img {
+  width:100%; height:auto; display:block; border-radius:2px;
+}
+/* Общий кадр всех форм огранки широкий и с подписями: рядом со схемой
+   он нечитаем, поэтому ряд разворачивается в колонку. */
+.preview-row.is-wide { flex-direction:column }
+.preview-row.is-wide .size-ref { max-width:460px }
 .result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
 .result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
 #r-mm-row[hidden] { display:none }
 
 
 /* ── Фото-референс размера (рука / ухо / запястье / шея) ── */
-.size-ref { margin:22px 0 0 }
-.size-ref__img { width:100%; max-width:520px; height:auto; display:block; border-radius:2px }
 
 /* ── Образовательный блок 4C ── */
 .edu { background:var(--bg-cream) }
@@ -265,3 +271,8 @@
   border:1px solid rgba(42,39,36,0.08); border-radius:2px;
 }
 .edu-card figcaption { font-size:14px; line-height:1.5; color:var(--fg-2); margin-top:12px }
+
+/* ── Качество камня: кнопка с расшифровкой под ней ── */
+.grade-opt { display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:210px }
+.grade-opt .chip { width:auto }
+.grade-opt__note { font-size:12px; line-height:1.35; color:var(--fg-2); opacity:.75; margin:0 }
