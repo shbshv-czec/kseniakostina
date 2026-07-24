@@ -92,15 +92,23 @@
     var d = mm(variant, weight);
     var vis = $('#size-vis');
     if (d) {
-      $('#r-mm').textContent = d.toFixed(1).replace('.', ',') + ' мм';
+      var mmText = d.toFixed(1).replace('.', ',') + ' мм';
+      $('#r-mm').textContent = mmText;
       $('#r-mm-row').hidden = false;
       // 1 мм ≈ 3.8 px: камень на экране примерно в натуральную величину
       var px = Math.max(10, Math.round(d * 3.8));
       $('#size-stone').style.width = px + 'px';
       $('#size-stone').style.height = px + 'px';
-      $('#size-cap').textContent = 'Примерно так камень выглядит вживую: ' +
-        d.toFixed(1).replace('.', ',') + ' мм в диаметре' +
+      $('#size-mm').textContent = 'Диаметр камня — ' + mmText +
         (product.id === 'studs' ? ' (каждый в паре)' : '');
+      // Подпись есть там, где кадр показывает камень на человеке.
+      // Для браслета и колье такой фразы в каталоге нет — не выдумываем.
+      $('#size-cap').textContent = SIZE_CAPTION[product.id] || '';
+      $('#size-cap').hidden = !SIZE_CAPTION[product.id];
+      // Справочная строка про караты и миллиметры верна для круглого
+      // камня. Там, где диаметр взят из таблицы изделия (дорожка,
+      // браслет, колье), она бы вводила в заблуждение.
+      $('#size-scale').hidden = !!variant.mm;
       vis.hidden = false;
     } else {
       $('#r-mm-row').hidden = true;
@@ -109,14 +117,16 @@
 
     if (!span) {
       out.classList.add('is-out');
-      $('#r-price').textContent = 'Рассчитаем индивидуально';
-      $('#r-price-note').textContent =
-        'Такой вес выходит за таблицы каталога — цену подберу под конкретный камень.';
+      $('#r-price').textContent = 'Посчитаю индивидуально';
+      $('#r-price-note').textContent = 'Такой вес выходит за рамки классических ' +
+        'позиций. Напишите мне — подберу камень под ваш запрос и назову точную стоимость.';
+      $('#r-discuss').textContent = 'Написать Ксении';
       $('#r-to-catalog').hidden = true;
       return;
     }
 
     out.classList.remove('is-out');
+    $('#r-discuss').textContent = 'Обсудить заказ';
     var lo = toHundreds(span[0]), hi = toHundreds(span[1]);
     $('#r-price').textContent = lo === hi ? money(lo) : money(lo) + ' — ' + money(hi);
     $('#r-price-note').textContent = lo === hi
@@ -152,49 +162,81 @@
     renderVariants();
   }
 
-  // Мелкая подпись под кнопкой качества — расшифровка обозначения.
-  // Для качеств, которых здесь нет (жёлтые бриллианты), подписи не
-  // придумываем: показываем только само обозначение.
+  // Расшифровка обозначения качества. Показывается одна — та, что
+  // относится к выбранной кнопке: три подписи разом читались как сплошной
+  // текст, и было неясно, какая к какой кнопке. Для качеств, которых здесь
+  // нет (жёлтые бриллианты), подписи не придумываем — строка просто пустая.
   var GRADE_NOTE = {
-    'any': 'Показывает вилку между обоими вариантами качества',
-    'F/VS1': 'Видимые дефекты отсутствуют',
-    'I/VS2': 'С видимыми включениями',
+    'any': 'Показывает вилку между обоими вариантами',
+    'F/VS1': 'Бесцветный, с очень мелкими включениями',
+    'I/VS2': 'Почти бесцветный, с очень мелкими включениями',
+    'Y-Z/VS2': 'Некоторые камни в цвете Y-Z имеют очень красивый жёлтый оттенок ' +
+      'и могут быть разумной альтернативой фантазийным',
+    'Fancy Yellow': 'Насыщенный жёлтый, фантазийная категория цвета',
   };
 
-  function gradeChips(host, items, onPick) {
-    host.innerHTML = '';
-    items.forEach(function (it) {
-      var wrap = document.createElement('div');
-      wrap.className = 'grade-opt';
-
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.textContent = it.name;
-      b.setAttribute('aria-pressed', String(it.id === grade));
-      b.addEventListener('click', function () { onPick(it); });
-      wrap.appendChild(b);
-
-      var note = GRADE_NOTE[it.id];
-      if (note) {
-        var p = document.createElement('p');
-        p.className = 'grade-opt__note';
-        p.textContent = note;
-        // Подпись читается вместе с кнопкой, а не отдельным текстом
-        var id = 'grade-note-' + it.id.replace(/[^\wа-яё]+/gi, '-');
-        p.id = id;
-        b.setAttribute('aria-describedby', id);
-        wrap.appendChild(p);
-      }
-      host.appendChild(wrap);
-    });
+  function renderGradeNote() {
+    var note = GRADE_NOTE[grade] || '';
+    var p = $('#grade-note');
+    p.textContent = note;
+    p.hidden = !note;
   }
+
+  // Размеры кадров изделий. Пропорции у групповых кадров разные — от
+  // почти квадрата до полосы 5:1, — поэтому размер проставляется в
+  // атрибуты, иначе при переключении исполнения вёрстка скачет, пока
+  // грузится файл. Числа печатает tools/prepare_images.py.
+  var ITEM_BOX = {
+    'soliter-round':   [720, 346],
+    'pave-round':      [720, 364],
+    'soliter-fancy':   [720, 175],
+    'pave-fancy':      [720, 166],
+    'doroshka':        [641, 560],
+    'studs-round':     [720, 134],
+    'studs-fancy':     [583, 560],
+    'studs-yellow':    [720, 180],
+    'tennis-bracelet': [579, 560],
+    'tennis-necklace': [539, 560],
+  };
+
+  // Схема размеров: собственные размеры кадров и место показа.
+  // Рядом с ползунком стоят те изделия, у которых на схеме подписаны
+  // караты, — она читается как продолжение шкалы веса.
+  var SIZE_REF = {
+    ring:     [900, 981],
+    studs:    [900, 720],
+    bracelet: [900, 1234],
+    necklace: [900, 1550],
+  };
+  var BESIDE_SLIDER = { ring: true, studs: true, bracelet: true };
+
+  // Подпись под кружком в натуральную величину. Есть только там, где
+  // кадр показывает камень на человеке.
+  var SIZE_CAPTION = {
+    ring: 'Так камень смотрится на пальце',
+    studs: 'Так камень смотрится в ухе',
+  };
 
   // Фраза огранки для изделий с единственным исполнением
   var CUT_PHRASE = {
     krug: 'Круглые бриллианты', oval: 'Фантазийная огранка',
     grusha: 'Фантазийная огранка', podushka: 'Огранка кушон',
   };
+
+  // Список форм фантазийной огранки — её же перечень из каталога.
+  // Круга здесь нет: он не фантазийный.
+  var FANCY_SHAPES = 'Подушка, радиант, принцесса, ашер, сердце, ' +
+    'триллиант, овал, груша, эмеральд, маркиз, багет.';
+
+  function uniq(list) {
+    return list.filter(function (v, i) { return list.indexOf(v) === i; });
+  }
+
+  function pick(id) {
+    variant = product.variants.filter(function (v) { return v.id === id; })[0];
+    afterVariant();
+    renderVariants();
+  }
 
   function renderVariants() {
     // Когда исполнение одно (браслет, колье), выбирать нечего — кнопку
@@ -204,6 +246,7 @@
     if (product.variants.length < 2) {
       $('#l-variant').hidden = true;
       $('#f-variant').hidden = true;
+      $('#cut-field').hidden = true;
       var solo = $('#variant-solo');
       solo.hidden = false;
       solo.textContent = (CUT_PHRASE[variant.cut] || variant.name) +
@@ -213,14 +256,50 @@
     $('#l-variant').hidden = false;
     $('#f-variant').hidden = false;
     $('#variant-solo').hidden = true;
+
+    // Кольца выбираются по двум осям: подтип и огранка. Разложить так
+    // получается только там, где в прайсе есть обе пары; у пусет
+    // «жёлтые бриллианты» — не огранка, и второй оси не выходит.
+    var byAxes = product.variants.every(function (v) { return v.family; });
+    if (!byAxes) {
+      $('#cut-field').hidden = true;
+      chips($('#f-variant'),
+        product.variants.map(function (v) { return { id: v.id, name: v.name }; }),
+        variant.id, function (it) { pick(it.id); });
+      return;
+    }
+
+    var families = uniq(product.variants.map(function (v) { return v.family; }));
     chips($('#f-variant'),
-      product.variants.map(function (v) { return { id: v.id, name: v.name }; }),
-      variant.id,
+      families.map(function (f) { return { id: f, name: f }; }),
+      variant.family,
       function (it) {
-        variant = product.variants.filter(function (v) { return v.id === it.id; })[0];
-        afterVariant();
-        renderVariants();
+        // При смене подтипа стараемся сохранить выбранную огранку:
+        // переключение «солитер → в обсыпке» не должно молча
+        // возвращать круглую, если человек смотрел фантазийную.
+        var inFamily = product.variants.filter(function (v) { return v.family === it.id; });
+        var same = inFamily.filter(function (v) { return v.cut_name === variant.cut_name; });
+        pick((same[0] || inFamily[0]).id);
       });
+
+    var cuts = product.variants
+      .filter(function (v) { return v.family === variant.family; })
+      .map(function (v) { return v.cut_name; });
+    $('#cut-field').hidden = cuts.length < 2;
+    if (cuts.length >= 2) {
+      chips($('#f-cut'),
+        uniq(cuts).map(function (c) { return { id: c, name: c }; }),
+        variant.cut_name,
+        function (it) {
+          pick(product.variants.filter(function (v) {
+            return v.family === variant.family && v.cut_name === it.id;
+          })[0].id);
+        });
+    }
+    var fancy = variant.cut_name === 'Фантазийная';
+    $('#cut-note').textContent = FANCY_SHAPES;
+    $('#cut-note').hidden = !fancy;
+    $('#side-note').hidden = !fancy;
   }
 
   function afterVariant() {
@@ -230,10 +309,11 @@
     if (variant.grades.length < 2) { grade = variant.grades[0]; }
     else if (!opts.some(function (o) { return o.id === grade; })) { grade = 'any'; }
 
-    var host = $('#f-grade');
     $('#grade-field').hidden = variant.grades.length < 2;
     if (variant.grades.length >= 2) {
-      gradeChips(host, opts, function (it) { grade = it.id; afterVariant(); render(); });
+      chips($('#f-grade'), opts, grade,
+        function (it) { grade = it.id; afterVariant(); render(); });
+      renderGradeNote();
     }
 
     var ws = variant.rows.map(function (r) { return r[0]; });
@@ -270,20 +350,25 @@
 
     // Фото — конкретного изделия под выбранное исполнение (item-<id>),
     // а не обобщённое по огранке: иначе у серёг показывалось кольцо.
-    // У фантазийной огранки нет одной формы, поэтому в прайсе такие
-    // варианты ссылаются на общий кадр со всеми 12 формами (variant.photo).
-    // Он широкий и с подписями — показываем его во всю колонку.
     var img = $('#cut-img');
-    var wide = !!variant.photo;
-    img.src = '../assets/img/cuts/' + (variant.photo || 'item-' + variant.id) + '.webp';
-    img.alt = wide
-      ? 'Формы фантазийной огранки: подушка, радиант, принцесса, ашер, круг, сердце, триллиант, овал, груша, эмеральд, маркиз, багет'
-      : product.name + ', ' + variant.name;
-    $('#preview-row').classList.toggle('is-wide', wide);
+    img.src = '../assets/img/cuts/item-' + variant.id + '.webp';
+    img.alt = product.name + ', ' + variant.name;
+    var ib = ITEM_BOX[variant.id];
+    if (ib) { img.width = ib[0]; img.height = ib[1]; }
+
     // Фото-референс размера — по типу изделия (рука / ухо / запястье / шея).
     var ref = $('#size-ref');
     ref.src = '../assets/img/cuts/size-' + product.id + '.webp';
     ref.alt = 'Наглядное сравнение размеров бриллиантов: ' + product.name.toLowerCase();
+    // Размеры кадров разные, поэтому проставляем их в атрибуты: иначе при
+    // переключении изделия вёрстка скачет, пока грузится картинка.
+    var box = SIZE_REF[product.id];
+    if (box) { ref.width = box[0]; ref.height = box[1]; }
+    // У колец, пусет и браслета схема подписана теми же каратами, что стоят
+    // под ползунком, — её место рядом со шкалой. У колье такой шкалы на
+    // кадре нет, он просто показывает изделие на шее, и остаётся под фото.
+    var slot = $(BESIDE_SLIDER[product.id] ? '#weight-ref-slot' : '#preview-ref-slot');
+    if ($('#size-ref-fig').parentNode !== slot) slot.appendChild($('#size-ref-fig'));
     render();
   }
 

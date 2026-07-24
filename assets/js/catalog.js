@@ -39,7 +39,7 @@
   var all = [];
   var view = [];
   var shown = 0;
-  var state = { stone: [], budget: [], type: [], stock: false, sold: false, sort: 'default' };
+  var state = { stone: [], budget: [], type: [], stock: false, sort: 'default' };
 
   /* ---------- Склонение ---------- */
   function plural(n, one, few, many) {
@@ -62,7 +62,6 @@
       state[k] = v ? v.split('|').filter(Boolean) : [];
     });
     state.stock = p.get('stock') === '1';
-    state.sold = p.get('sold') === '1';
     state.sort = p.get('sort') || 'default';
   }
 
@@ -72,15 +71,16 @@
       if (state[k].length) p.set(k, state[k].join('|'));
     });
     if (state.stock) p.set('stock', '1');
-    if (state.sold) p.set('sold', '1');
     if (state.sort !== 'default') p.set('sort', state.sort);
     var q = p.toString();
     history.replaceState(null, '', q ? '?' + q : location.pathname);
   }
 
   /* ---------- Отбор и сортировка ---------- */
+  // По умолчанию показываем всё, включая проданное: витрина за полтора года
+  // — это и есть доказательство, что камни такого уровня реально проходят
+  // через руки. Прячет проданное только кнопка «Только в наличии».
   function match(item) {
-    if (!state.sold && item.sold) return false;
     if (state.stock && !item.in_stock) return false;
     if (state.stone.length && state.stone.indexOf(item.stone) < 0) return false;
     if (state.budget.length && state.budget.indexOf(item.budget) < 0) return false;
@@ -112,7 +112,7 @@
 
   function isFiltered() {
     return state.stone.length || state.budget.length || state.type.length ||
-           state.stock || state.sold || state.sort !== 'default';
+           state.stock || state.sort !== 'default';
   }
 
   /* ---------- Отрисовка ---------- */
@@ -345,16 +345,14 @@
     readUrl();
 
     toggle('#t-stock', 'stock');
-    toggle('#t-sold', 'sold');
 
     var sort = $('#sort');
     sort.value = state.sort;
     sort.addEventListener('change', function () { state.sort = sort.value; apply(); });
 
     $('#reset').addEventListener('click', function () {
-      state = { stone: [], budget: [], type: [], stock: false, sold: false, sort: 'default' };
+      state = { stone: [], budget: [], type: [], stock: false, sort: 'default' };
       $('#t-stock').setAttribute('aria-pressed', 'false');
-      $('#t-sold').setAttribute('aria-pressed', 'false');
       sort.value = 'default';
       apply();
       window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });

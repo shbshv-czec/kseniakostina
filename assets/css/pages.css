@@ -14,21 +14,24 @@
 .page-head .lead { margin-top:20px; max-width:62ch; color:var(--fg-2) }
 
 /* ── Панель фильтров ── */
+/* Панель листается вместе со страницей, а не закрепляется сверху: на
+   телефоне четыре строки кнопок съедали половину экрана, и карточек было
+   видно меньше, чем фильтров. Полупрозрачного фона с размытием тоже больше
+   нет — он был нужен, только пока под панелью проезжали карточки. */
 .filters {
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:rgba(255,255,255,0.86);
-  backdrop-filter:blur(16px) saturate(1.4);
+  background:var(--bg-white);
   border-block:1px solid rgba(42,39,36,0.08);
   padding:18px var(--gutter);
 }
 .filters__row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px }
 .filters__row:last-child { margin-bottom:0 }
+/* Сортировка и сброс — отдельными нижними строками, под всеми фильтрами:
+   это не условие отбора, а способ показа, поэтому они стоят после него. */
+.filters__row--sort { margin-top:14px }
+.filters__reset { justify-content:flex-start }
 /* Обёртка групп кнопок: display:contents убирает лишний уровень,
    поэтому кнопки переносятся в общем потоке строки фильтров. */
 .filters__group { display:contents }
-.filters__label--inline { min-width:0 }
 .filters__label {
   font-size:12px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase;
   color:var(--fg-2); opacity:.7; margin-right:4px; flex:none; min-width:74px;
@@ -202,19 +205,44 @@
 .result__actions .btn { text-align:center; justify-content:center }
 
 /* Наглядность размера камня */
-.size-vis { margin-top:22px; display:flex; align-items:center; gap:16px }
+/* ── Пропорции: камень в натуральную величину ── */
+.size-vis { margin-top:26px }
+.size-vis__row { display:flex; align-items:center; gap:16px; margin-top:2px }
 .size-vis__stone {
   border-radius:50%; flex:none;
   background:radial-gradient(120% 120% at 32% 26%, #fff 0%, #E7E3DC 42%, #B9B2A6 100%);
   box-shadow:0 2px 10px rgba(42,39,36,.22), inset 0 0 0 1px rgba(42,39,36,.14);
 }
-.size-vis__cap { font-size:13px; color:var(--fg-2); line-height:1.45 }
+.size-vis__mm { font-size:16px; font-weight:600; margin:0; font-variant-numeric:tabular-nums }
+.size-vis__cap { font-size:14px; color:var(--fg-2); line-height:1.45; margin:3px 0 0 }
+.size-vis__ref { font-size:13px; color:var(--fg-2); opacity:.7; margin:5px 0 0 }
 
-.terms { background:var(--bg-ink); color:var(--fg-inv) }
-.terms__grid { margin-top:clamp(32px,4vw,52px); display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:clamp(24px,3vw,44px) }
-.terms .h2 { margin-bottom:0 }
-.terms h3 { font-family:var(--font-display); font-size:19px; font-weight:600; margin:0 0 10px }
-.terms p { font-size:15px; line-height:1.6; color:rgba(250,244,239,.72); margin:0 }
+/* ── Списки на текстовых блоках страницы ── */
+/* Маркер — тонкая линия, а не точка: точки спорят с засечками
+   заголовков, а строки здесь короткие и читаются как перечень. */
+.ticks { list-style:none; margin:clamp(28px,3vw,40px) 0 0; padding:0 }
+.ticks li {
+  position:relative; padding-left:26px; margin-bottom:14px;
+  font-size:16px; line-height:1.55;
+}
+.ticks li::before {
+  content:''; position:absolute; left:0; top:.72em;
+  width:14px; height:1px; background:var(--gold-champagne);
+}
+.ticks li:last-child { margin-bottom:0 }
+
+.steps { counter-reset:step; list-style:none; margin:clamp(28px,3vw,40px) 0 0; padding:0 }
+.steps li {
+  counter-increment:step; position:relative; padding-left:44px;
+  margin-bottom:22px; font-size:16px; line-height:1.6; color:var(--fg-2);
+}
+.steps li::before {
+  content:counter(step); position:absolute; left:0; top:0;
+  font-family:var(--font-display); font-size:19px; font-weight:600;
+  color:var(--gold); line-height:1.55;
+}
+.steps li:last-child { margin-bottom:0 }
+.steps__pay-label { margin-top:clamp(32px,4vw,44px) }
 
 @media (max-width:900px) {
   .calc__grid { grid-template-columns:1fr }
@@ -222,7 +250,6 @@
   /* Обёртка групп кнопок: display:contents убирает лишний уровень,
    поэтому кнопки переносятся в общем потоке строки фильтров. */
 .filters__group { display:contents }
-.filters__label--inline { min-width:0 }
 .filters__label { min-width:0; width:100%; margin-bottom:2px }
   .filters { padding:14px var(--gutter) }
   .grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr)); gap:12px }
@@ -242,14 +269,36 @@
   display:flex; gap:clamp(12px,2vw,24px); align-items:flex-start;
   margin:8px 0 4px;
 }
-.preview-row > * { flex:1 1 0; min-width:0; margin:0 }
-.cut-preview__photo, .size-ref__img {
-  width:100%; height:auto; display:block; border-radius:2px;
+/* Схему в ряд отдаёт слот с display:contents, поэтому она не попадает
+   под `> *` — перечисляем оба элемента ряда явно. */
+.preview-row > *, .preview-row .size-ref { flex:1 1 0; min-width:0; margin:0 }
+/* Фото изделия обрезано по самому изделию, лишнего поля в нём нет,
+   поэтому ограничивать ширину не нужно: узкая полоса из трёх колец
+   и во всю колонку остаётся невысокой. */
+.cut-preview__photo, .size-ref__img { display:block; border-radius:2px }
+.size-ref__img { width:100%; height:auto }
+/* Фото изделия — по ширине колонки, но не выше 400 px. Пропорции у
+   групповых кадров разные: полоса из трёх колец и во всю ширину
+   остаётся низкой, а почти квадратный кадр браслета без ограничения
+   занимал бы пол-экрана. */
+.cut-preview__photo { max-width:100%; max-height:400px; width:auto; height:auto }
+/* Слот показа: display:contents убирает лишний уровень, и картинка
+   становится прямым элементом ряда. Пустой слот не занимает места,
+   поэтому ряд не приходится переключать классами. */
+.slot { display:contents }
+
+/* ── Вес камня и схема размеров в один ряд ── */
+/* Схема подписана теми же каратами, что стоят точками под ползунком:
+   рядом они читаются как одна шкала. Ползунок при этом становится
+   короче — во всю колонку он обещал плавность, которой за пятью
+   табличными точками нет. */
+.weight-row { display:flex; gap:clamp(16px,2.5vw,32px); align-items:flex-start }
+.weight-row .field { flex:1 1 auto; min-width:0 }
+.weight-row .size-ref { flex:0 0 clamp(150px,26%,240px); margin:0 }
+@media (max-width:560px) {
+  .weight-row { flex-direction:column }
+  .weight-row .size-ref { flex:none; align-self:center; max-width:260px }
 }
-/* Общий кадр всех форм огранки широкий и с подписями: рядом со схемой
-   он нечитаем, поэтому ряд разворачивается в колонку. */
-.preview-row.is-wide { flex-direction:column }
-.preview-row.is-wide .size-ref { max-width:460px }
 .result__price-note { font-size:14px; color:var(--fg-2); opacity:.8; margin:8px 0 0 }
 .result.is-out .result__price { font-size:clamp(22px,2.6vw,28px) }
 #r-mm-row[hidden] { display:none }
@@ -275,7 +324,5 @@
 .edu-card figcaption { font-size:14px; line-height:1.5; color:var(--fg-2); margin-top:14px }
 .edu-card figcaption b { color:var(--fg-1); font-weight:600 }
 
-/* ── Качество камня: кнопка с расшифровкой под ней ── */
-.grade-opt { display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:210px }
-.grade-opt .chip { width:auto }
-.grade-opt__note { font-size:12px; line-height:1.35; color:var(--fg-2); opacity:.75; margin:0 }
+/* Расшифровка качества — одной строкой под рядом кнопок (#grade-note),
+   оформление берётся из .field__hint. */

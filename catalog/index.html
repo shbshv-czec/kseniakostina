@@ -86,17 +86,22 @@
         <div id="f-type" class="filters__group" role="group" aria-labelledby="l-type"></div>
       </div>
       <div class="filters__row">
-        <span class="filters__label">Показ</span>
+        <span class="filters__label">Показать</span>
         <button id="t-stock" type="button" class="chip" aria-pressed="false">Только в наличии</button>
-        <button id="t-sold" type="button" class="chip" aria-pressed="false">Показать проданные</button>
-        <label class="filters__label filters__label--inline" for="sort">Сортировка</label>
+      </div>
+      <!-- Сортировка и сброс — свои строки в самом низу панели: они не
+           сужают выборку, а меняют её показ, и читаются после условий. -->
+      <div class="filters__row filters__row--sort">
+        <label class="filters__label" for="sort">Сортировка</label>
         <select id="sort" class="select">
           <option value="default">Сначала в наличии</option>
           <option value="cheap">Сначала дешевле</option>
           <option value="costly">Сначала дороже</option>
           <option value="carat">Больше карат</option>
         </select>
-        <button id="reset" type="button" class="reset" hidden>Сбросить фильтры</button>
+      </div>
+      <div class="filters__row filters__reset">
+        <button id="reset" type="button" class="reset" hidden>Сбросить параметры поиска</button>
       </div>
     </div>
   </section>
