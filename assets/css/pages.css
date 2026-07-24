@@ -218,7 +218,6 @@
 }
 .size-vis__mm { font-size:16px; font-weight:600; margin:0; font-variant-numeric:tabular-nums }
 .size-vis__cap { font-size:14px; color:var(--fg-2); line-height:1.45; margin:3px 0 0 }
-.size-vis__ref { font-size:13px; color:var(--fg-2); opacity:.7; margin:5px 0 0 }
 
 /* ── Списки на текстовых блоках страницы ── */
 /* Маркер — тонкая линия, а не точка: точки спорят с засечками
@@ -335,7 +334,7 @@
 .statement {
   font-family:var(--font-display); font-weight:600;
   font-size:clamp(22px,2.6vw,34px); line-height:1.3; letter-spacing:.4px;
-  margin:0; max-width:34ch;
+  margin:0 auto; max-width:34ch; text-align:center;
 }
 
 /* Расшифровка качества — одной строкой под рядом кнопок (#grade-note),

@@ -105,10 +105,6 @@
       // Для браслета и колье такой фразы в каталоге нет — не выдумываем.
       $('#size-cap').textContent = SIZE_CAPTION[product.id] || '';
       $('#size-cap').hidden = !SIZE_CAPTION[product.id];
-      // Справочная строка про караты и миллиметры верна для круглого
-      // камня. Там, где диаметр взят из таблицы изделия (дорожка,
-      // браслет, колье), она бы вводила в заблуждение.
-      $('#size-scale').hidden = !!variant.mm;
       vis.hidden = false;
     } else {
       $('#r-mm-row').hidden = true;
