@@ -80,18 +80,22 @@
   // По умолчанию показываем всё, включая проданное: витрина за полтора года
   // — это и есть доказательство, что камни такого уровня реально проходят
   // через руки. Прячет проданное только кнопка «Только в наличии».
-  // Виды изделия у позиции. У сета их несколько (сам «Сет» плюс каждая
-  // составляющая), поэтому он находится по любому из своих фильтров.
-  // Старые данные без поля types подстраховываем одиночным type.
+  // Виды изделия и камни у позиции многозначны: сет находится по каждой
+  // своей составляющей, а пост с апатитами и топазами — по любому из
+  // камней. Старые данные без массивов подстраховываем одиночным полем.
   function typesOf(item) { return item.types || (item.type ? [item.type] : []); }
+  function stonesOf(item) { return item.stones || (item.stone ? [item.stone] : []); }
+  function listOf(field, item) { return field === 'type' ? typesOf(item) : stonesOf(item); }
+
+  function hits(field, item) {
+    return listOf(field, item).some(function (v) { return state[field].indexOf(v) >= 0; });
+  }
 
   function match(item) {
     if (state.stock && !item.in_stock) return false;
-    if (state.stone.length && state.stone.indexOf(item.stone) < 0) return false;
+    if (state.stone.length && !hits('stone', item)) return false;
     if (state.budget.length && state.budget.indexOf(item.budget) < 0) return false;
-    if (state.type.length && !typesOf(item).some(function (t) {
-      return state.type.indexOf(t) >= 0;
-    })) return false;
+    if (state.type.length && !hits('type', item)) return false;
     return true;
   }
 
@@ -290,9 +294,10 @@
     state[field] = saved;
     var map = {};
     base.forEach(function (i) {
-      // Тип многозначен (сет считается в каждой своей категории),
-      // остальные поля — по одному значению.
-      var vals = field === 'type' ? typesOf(i) : (i[field] ? [i[field]] : []);
+      // Тип и камень многозначны (сет — в каждой категории, апатиты+топазы
+      // — в обоих камнях), бюджет — по одному значению.
+      var vals = (field === 'type' || field === 'stone')
+        ? listOf(field, i) : (i[field] ? [i[field]] : []);
       vals.forEach(function (v) { map[v] = (map[v] || 0) + 1; });
     });
     return map;

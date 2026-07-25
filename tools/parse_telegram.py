@@ -221,6 +221,36 @@ def parse_stone_from_text(text):
     return None
 
 
+def stone_list(tags, text):
+    """Все камни поста, в порядке STONE_TAGS и без повторов. В одном посте
+    иногда продают несколько разных камней (апатиты и топазы) — тогда он
+    находится по любому из них. Первый в списке — основной, он идёт на
+    заголовок и цвет карточки."""
+    tagset = set(tags)
+    out = []
+    for tag, name in STONE_TAGS:
+        if tag in tagset and name not in out:
+            out.append(name)
+    # #Параибы и #Турмалин на одном посте — это параиба, а не два камня:
+    # параиба и есть разновидность турмалина.
+    if 'Турмалин параиба' in out and 'Турмалин' in out:
+        out.remove('Турмалин')
+    # Бриллиантовая обсыпка — отделка цветного камня, а не второй товар.
+    # Если в посте есть цветной камень, бриллианты (и белые, и жёлтые) в
+    # список не идут: иначе фильтр «Бриллиант» собрал бы все цветные с
+    # обсыпкой. Основным бриллиант всё равно не был — в STONE_TAGS он
+    # последний. Пара из двух бриллиантов (белый+жёлтый) остаётся: там
+    # оба и есть предмет поста.
+    DIAMONDS = ('Бриллиант', 'Жёлтый бриллиант')
+    if any(s not in DIAMONDS for s in out):
+        out = [s for s in out if s not in DIAMONDS]
+    if not out:
+        one = parse_stone_from_text(text)
+        if one:
+            out = [one]
+    return out
+
+
 def build(csv_path):
     with io.open(csv_path, encoding='utf-8-sig') as fh:
         rows = list(csv.DictReader(fh, delimiter=';'))
@@ -245,14 +275,15 @@ def build(csv_path):
             continue
 
         tags = find_tags(raw)
-        stone = pick(STONE_TAGS, tags) or parse_stone_from_text(text)
+        stones = stone_list(tags, text)
         price, per_carat, by_request, note = parse_price(text)
         mid = int(row['message_id'])
         main_type, type_list = classify(tags)
 
         item = {
             'id': mid,
-            'stone': stone,
+            'stone': stones[0] if stones else None,
+            'stones': stones,
             'type': main_type,
             'types': type_list,
             'cut': parse_cut(text),
@@ -281,10 +312,12 @@ def build(csv_path):
             target = by_id.get(patch.get('id'))
             if target:
                 target.update({k: v for k, v in patch.items() if k != 'id'})
-                # Правка типа руками, без списка типов, — приводим список
+                # Правка камня или типа руками, без списка, — приводим список
                 # в соответствие, иначе фильтр и карточка разойдутся.
                 if 'type' in patch and 'types' not in patch:
                     target['types'] = [target['type']]
+                if 'stone' in patch and 'stones' not in patch:
+                    target['stones'] = [target['stone']] if target['stone'] else []
                 applied += 1
         print('применено ручных исправлений: %d из %d' % (applied, len(patches)))
 
