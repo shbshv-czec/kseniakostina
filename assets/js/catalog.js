@@ -135,12 +135,28 @@
       (n ? ' · ' + s + ' в наличии' : '');
   }
 
+  // Все камни поста: «апатиты и топазы» — это два камня, и оба должны
+  // стоять в названии, а не только первый. Первый с большой буквы,
+  // остальные с маленькой, соединены «и».
+  function stoneNames(item) {
+    var st = stonesOf(item);
+    if (!st.length) return 'Камень';
+    return st.map(function (s, i) { return i === 0 ? s : s.toLowerCase(); }).join(' и ');
+  }
+
+  // Заголовок карточки. Огранку добавляем только при одном камне: у разных
+  // камней она разная, одна подпись врала бы.
+  function stoneTitle(item) {
+    var name = stoneNames(item);
+    if (stonesOf(item).length === 1 && item.cut) name += ', ' + item.cut.toLowerCase();
+    return name;
+  }
+
   function card(item) {
     var li = document.createElement('li');
     li.className = 'card';
 
-    var name = item.stone || 'Камень';
-    if (item.cut) name += ', ' + item.cut.toLowerCase();
+    var name = stoneTitle(item);
 
     var media = document.createElement('div');
     media.className = 'card__media';
@@ -159,7 +175,7 @@
       ph.style.setProperty('--c1', tint[0]);
       ph.style.setProperty('--c2', tint[1]);
       ph.innerHTML = '<span></span>';
-      ph.firstChild.textContent = item.stone || '—';
+      ph.firstChild.textContent = stonesOf(item).length ? stoneNames(item) : '—';
       media.appendChild(ph);
     }
     // Плашка есть у каждой карточки. Канал делит посты ровно надвое:
