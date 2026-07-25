@@ -121,6 +121,32 @@ def pick(pairs, tags):
     return None
 
 
+def item_types(tags):
+    """Все виды изделия в посте, в порядке приоритета TYPE_TAGS и без
+    повторов (теннисный и обычный браслет мапятся разными тегами, но это
+    один вид). Пусто — значит изделия нет, продаётся сам камень."""
+    tagset = set(tags)
+    out = []
+    for tag, value in TYPE_TAGS:
+        if tag in tagset and value not in out:
+            out.append(value)
+    return out
+
+
+def classify(tags):
+    """Возвращает (основной тип, список типов для фильтра).
+
+    Один вид — как раньше. Два и больше — это сет: он и «Сет», и каждая
+    своя составляющая, поэтому находится по любому из фильтров. Ни одного —
+    отдельный камень."""
+    kinds = item_types(tags)
+    if len(kinds) >= 2:
+        return 'Сет', ['Сет'] + kinds
+    if len(kinds) == 1:
+        return kinds[0], kinds
+    return 'Отдельный камень', ['Отдельный камень']
+
+
 def parse_price(text):
     """
     Возвращает (цена, за_карат, по_запросу, замечание).
@@ -222,11 +248,13 @@ def build(csv_path):
         stone = pick(STONE_TAGS, tags) or parse_stone_from_text(text)
         price, per_carat, by_request, note = parse_price(text)
         mid = int(row['message_id'])
+        main_type, type_list = classify(tags)
 
         item = {
             'id': mid,
             'stone': stone,
-            'type': pick(TYPE_TAGS, tags),
+            'type': main_type,
+            'types': type_list,
             'cut': parse_cut(text),
             'carat': parse_carat(text),
             'price': price,
@@ -253,6 +281,10 @@ def build(csv_path):
             target = by_id.get(patch.get('id'))
             if target:
                 target.update({k: v for k, v in patch.items() if k != 'id'})
+                # Правка типа руками, без списка типов, — приводим список
+                # в соответствие, иначе фильтр и карточка разойдутся.
+                if 'type' in patch and 'types' not in patch:
+                    target['types'] = [target['type']]
                 applied += 1
         print('применено ручных исправлений: %d из %d' % (applied, len(patches)))
 
@@ -275,7 +307,13 @@ def report(items, skipped, review):
     print('  бюджет            ', pct('budget'))
     print('  вес               ', pct('carat'))
     print('  цена              ', pct('price'))
-    print('  тип изделия       ', pct('type'))
+    # Тип теперь есть всегда: изделие, «Сет» или «Отдельный камень».
+    jew = sum(1 for i in items if i['type'] not in ('Отдельный камень', 'Сет'))
+    sets = sum(1 for i in items if i['type'] == 'Сет')
+    stones = sum(1 for i in items if i['type'] == 'Отдельный камень')
+    print('  изделий           ', '%3d%% (%d из %d)' % (round(100 * jew / n), jew, n))
+    print('  сетов             ', sets)
+    print('  отдельных камней  ', stones)
     print('  огранка           ', pct('cut'))
     print('  в наличии         ', sum(1 for i in items if i['in_stock']))
     print('  фото на диске     ', sum(1 for i in items if i['photo']))

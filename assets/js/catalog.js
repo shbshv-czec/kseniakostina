@@ -80,11 +80,18 @@
   // По умолчанию показываем всё, включая проданное: витрина за полтора года
   // — это и есть доказательство, что камни такого уровня реально проходят
   // через руки. Прячет проданное только кнопка «Только в наличии».
+  // Виды изделия у позиции. У сета их несколько (сам «Сет» плюс каждая
+  // составляющая), поэтому он находится по любому из своих фильтров.
+  // Старые данные без поля types подстраховываем одиночным type.
+  function typesOf(item) { return item.types || (item.type ? [item.type] : []); }
+
   function match(item) {
     if (state.stock && !item.in_stock) return false;
     if (state.stone.length && state.stone.indexOf(item.stone) < 0) return false;
     if (state.budget.length && state.budget.indexOf(item.budget) < 0) return false;
-    if (state.type.length && state.type.indexOf(item.type) < 0) return false;
+    if (state.type.length && !typesOf(item).some(function (t) {
+      return state.type.indexOf(t) >= 0;
+    })) return false;
     return true;
   }
 
@@ -161,7 +168,9 @@
 
     var spec = [];
     if (item.carat) spec.push(item.carat + ' ct');
-    if (item.type) spec.push(item.type.toLowerCase());
+    // «Отдельный камень» в подписи не повторяем — заголовок карточки
+    // это и так камень. У сета вид, наоборот, полезен.
+    if (item.type && item.type !== 'Отдельный камень') spec.push(item.type.toLowerCase());
 
     var body = document.createElement('div');
     body.className = 'card__body';
@@ -281,7 +290,10 @@
     state[field] = saved;
     var map = {};
     base.forEach(function (i) {
-      if (i[field]) map[i[field]] = (map[i[field]] || 0) + 1;
+      // Тип многозначен (сет считается в каждой своей категории),
+      // остальные поля — по одному значению.
+      var vals = field === 'type' ? typesOf(i) : (i[field] ? [i[field]] : []);
+      vals.forEach(function (v) { map[v] = (map[v] || 0) + 1; });
     });
     return map;
   }
@@ -321,7 +333,14 @@
     fill('#f-budget', BUDGETS.filter(function (v) { return cb[v]; })
       .map(function (v) { return chip('budget', v, cb[v]); }));
 
-    var types = Object.keys(ct).sort(function (a, b) { return ct[b] - ct[a]; });
+    // Украшения — по частоте, а «Сет» и «Отдельный камень» всегда в конце:
+    // это не виды украшений, а особые корзины, и мешать их в общий ряд
+    // по числу позиций сбивает — иначе «Отдельный камень» (самый частый)
+    // встал бы первым, вперёд колец.
+    var TAIL = { 'Сет': 1, 'Отдельный камень': 2 };
+    var types = Object.keys(ct).sort(function (a, b) {
+      return (TAIL[a] || 0) - (TAIL[b] || 0) || ct[b] - ct[a];
+    });
     fill('#f-type', types.map(function (v) { return chip('type', v, ct[v]); }));
   }
 
